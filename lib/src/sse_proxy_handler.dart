@@ -1,3 +1,17 @@
+// Copyright 2019 Workiva Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -14,6 +28,11 @@ String _sseHeaders(String origin) => 'HTTP/1.1 200 OK\r\n'
     'Access-Control-Allow-Origin: $origin\r\n'
     '\r\n';
 
+/// [SseProxyHandler] proxies two-way communications of JSON encodable data
+/// between clients and an [SseHandler].
+///
+/// This handler provides the same communication interface as [SseHandler], but
+/// simply forwards data back and forth between clients and the actual server.
 class SseProxyHandler {
   final _httpClient = http.Client();
   shelf.Handler _incomingMessageProxyHandler;
@@ -22,37 +41,35 @@ class SseProxyHandler {
   final Uri _proxyUri;
   final Uri _serverUri;
 
-  SseProxyHandler(this._proxyUri, this._serverUri, {String proxyName})
-      : _proxyName = proxyName;
+  /// Creates an SSE proxy handler that will handle EventSource requests to
+  /// [proxyUri] by proxying them to [serverUri].
+  SseProxyHandler(Uri proxyUri, Uri serverUri, {String proxyName})
+      : _proxyUri = proxyUri,
+        _serverUri = serverUri,
+        _proxyName = proxyName;
 
   shelf.Handler get handler => _handle;
 
   Future<shelf.Response> _createSseConnection(
       shelf.Request req, String path) async {
     final serverReq = http.StreamedRequest(
-        req.method, _serverUri.replace(query: req.requestedUri.query));
-    serverReq
+        req.method, _serverUri.replace(query: req.requestedUri.query))
       ..followRedirects = false
       ..headers.addAll(req.headers)
       ..headers['Host'] = _serverUri.authority
       ..sink.close();
 
     final serverResponse = await _httpClient.send(serverReq);
-    _logger.fine('... proxy-->server SSE connection established.');
 
     req.hijack((channel) {
       final sink = utf8.encoder.startChunkedConversion(channel.sink)
         ..add(_sseHeaders(req.headers['origin']));
-      _logger.fine('... client-->proxy SSE connection established.');
 
       StreamSubscription serverSseSub;
       StreamSubscription reqChannelSub;
 
-      serverSseSub = utf8.decoder.bind(serverResponse.stream).listen((data) {
-        // Forward data from server to client.
-        sink.add(data);
-      }, onDone: () {
-        _logger.fine('... proxy-->server SSE connection closed by server.');
+      serverSseSub =
+          utf8.decoder.bind(serverResponse.stream).listen(sink.add, onDone: () {
         reqChannelSub?.cancel();
         sink.close();
       });
@@ -60,7 +77,6 @@ class SseProxyHandler {
       reqChannelSub = channel.stream.listen((_) {
         // SSE is unidirectional.
       }, onDone: () {
-        _logger.fine('... client-->proxy SSE connection closed by client.');
         serverSseSub?.cancel();
         sink.close();
       });

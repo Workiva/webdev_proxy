@@ -1,6 +1,25 @@
+// Copyright 2019 Workiva Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 final _defaultWebDirs = const ['web'];
 final _dirPattern = RegExp(r'^(\w+)(?::(\d+))?$');
 
+/// Returns a mapping of directories to ports parsed from command-line [args] in
+/// the form of `<directory>:<port>`.
+///
+/// If no mappings are specified in [args], the default mapping of web:8080 is
+/// returned.
 Map<String, int> parseDirectoryArgs(List<String> args) {
   final result = <String, int>{};
   var basePort = 8080;
@@ -22,6 +41,10 @@ Map<String, int> parseDirectoryArgs(List<String> args) {
   return result;
 }
 
+/// Returns the value of the `--hostname` option from a list of command-line
+/// [args] only if it is specified.
+///
+/// Otherwise, returns a default of `'localhost'`.
 String parseHostname(List<String> args) {
   for (var i = 0; i < args.length; i++) {
     if (!args[i].startsWith('--hostname')) {

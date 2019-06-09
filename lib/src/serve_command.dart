@@ -1,3 +1,17 @@
+// Copyright 2019 Workiva Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import 'dart:async';
 import 'dart:io';
 
@@ -6,12 +20,16 @@ import 'package:io/ansi.dart';
 import 'package:io/io.dart';
 import 'package:pedantic/pedantic.dart';
 
+import 'package:webdev_proxy/src/command_runner.dart';
 import 'package:webdev_proxy/src/command_utils.dart';
 import 'package:webdev_proxy/src/logging.dart';
-import 'package:webdev_proxy/src/proxy_server.dart';
 import 'package:webdev_proxy/src/webdev_arg_utils.dart';
 import 'package:webdev_proxy/src/webdev_proc_utils.dart';
+import 'package:webdev_proxy/src/webdev_proxy_server.dart';
 
+/// The `serve` command for the [WebdevProxy] command-runner.
+///
+/// Runs `webdev serve` behind a simple HTTP proxy.
 class ServeCommand extends Command<int> {
   static const rewrite404sFlag = 'rewrite-404s';
 
@@ -111,8 +129,8 @@ class ServeCommand extends Command<int> {
     ]);
 
     // Start a proxy server for each directory.
-    final proxies =
-        await Future.wait(portsToServeByDir.keys.map((dir) => ProxyServer.start(
+    final proxies = await Future.wait(
+        portsToServeByDir.keys.map((dir) => WebdevProxyServer.start(
               dir: dir,
               hostname: hostname,
               portToProxy: portsToProxyByDir[dir],
