@@ -5,7 +5,7 @@ import 'package:io/ansi.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:webdev_proxy/src/logging.dart';
 
-final webdevCompatibility = new VersionConstraint.parse('^2.0.7');
+final webdevCompatibility = new VersionConstraint.parse('>=1.0.1 <3.0.0');
 
 ProcessResult cachedWebdevVersionResult;
 Version getGlobalWebdevVersion() {

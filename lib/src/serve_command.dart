@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:io/ansi.dart';
+import 'package:io/io.dart';
 import 'package:pedantic/pedantic.dart';
 
 import 'package:webdev_proxy/src/command_utils.dart';
@@ -31,26 +32,12 @@ class ServeCommand extends Command<int> {
       '[-- [webdev serve arguments]]';
 
   @override
-  String get usageFooter {
-    if (_missingWebdev) {
-      return red.wrap(
-        'This command requires that `webdev` be activated globally.\n'
-        'Please run the following:\n'
-        '\tpub global activate webdev $webdevCompatibility',
-      );
-    } else if (!_hasCompatibleWebdev) {
-      return red.wrap(
-        'This command is only compatible with `webdev $webdevCompatibility`,\n'
-        'but you currently have v${getGlobalWebdevVersion()} active.\n'
-        'Please run the following to activate a compatible version:\n'
-        '\tpub global activate webdev $webdevCompatibility',
-      );
-    }
-    return null;
-  }
+  String get usageFooter => _webdevCompatibilityHelp;
 
   @override
   String get name => 'serve';
+
+  bool get _canUseWebdev => !_missingWebdev && _hasCompatibleWebdev;
 
   bool get _hasCompatibleWebdev =>
       webdevCompatibility.allows(getGlobalWebdevVersion());
@@ -71,8 +58,31 @@ class ServeCommand extends Command<int> {
     }
   }
 
+  String get _webdevCompatibilityHelp {
+    if (_missingWebdev) {
+      return red.wrap(
+        'This command requires that `webdev` be activated globally.\n'
+        'Please run the following:\n'
+        '\tpub global activate webdev $webdevCompatibility',
+      );
+    } else if (!_hasCompatibleWebdev) {
+      return red.wrap(
+        'This command is only compatible with `webdev $webdevCompatibility`, '
+        'but you currently have webdev ${getGlobalWebdevVersion()} active.\n'
+        'Please run the following to activate a compatible version:\n'
+        '\tpub global activate webdev $webdevCompatibility',
+      );
+    }
+    return null;
+  }
+
   @override
   Future<int> run() async {
+    if (!_canUseWebdev) {
+      print(_webdevCompatibilityHelp);
+      return ExitCode.usage.code;
+    }
+
     // This command doesn't allow overriding the formatter inputs or specifying
     // any arguments at the dart_dev level. Instead arguments should be passed
     // after the `--` separator.
