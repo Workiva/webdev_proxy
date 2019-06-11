@@ -81,14 +81,14 @@ class ServeCommand extends Command<int> {
       return red.wrap(
         'This command requires that `webdev` be activated globally.\n'
         'Please run the following:\n'
-        '\tpub global activate webdev $webdevCompatibility',
+        '\tpub global activate webdev "$webdevCompatibility"',
       );
     } else if (!_hasCompatibleWebdev) {
       return red.wrap(
         'This command is only compatible with `webdev $webdevCompatibility`, '
         'but you currently have webdev ${getGlobalWebdevVersion()} active.\n'
         'Please run the following to activate a compatible version:\n'
-        '\tpub global activate webdev $webdevCompatibility',
+        '\tpub global activate webdev "$webdevCompatibility"',
       );
     }
     return null;
