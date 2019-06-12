@@ -19,8 +19,6 @@ import 'package:io/ansi.dart';
 import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 
-import 'package:webdev_proxy/src/logging.dart';
-
 /// The range of `webdev` versions with which this `webdev_proxy` package is
 /// compatible.
 final webdevCompatibility = new VersionConstraint.parse('>=1.0.1 <3.0.0');
@@ -57,18 +55,6 @@ Future<int> printWebdevServeHelp() async {
   final process = await Process.start(
     'pub',
     ['global', 'run', 'webdev', 'help', 'serve'],
-    mode: ProcessStartMode.inheritStdio,
-  );
-  return process.exitCode;
-}
-
-/// Starts a `webdev serve` process with the given [args].
-Future<int> startWebdevServe(List<String> args) async {
-  final webdevArgs = ['global', 'run', 'webdev', 'serve', ...args];
-  log.fine('Running `pub ${webdevArgs.join(' ')}');
-  final process = await Process.start(
-    'pub',
-    webdevArgs,
     mode: ProcessStartMode.inheritStdio,
   );
   return process.exitCode;

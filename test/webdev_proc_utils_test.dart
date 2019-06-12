@@ -30,19 +30,19 @@ void main() {
       cachedWebdevVersionResult = null;
     });
 
-    test('with webdev not activated', () {
-      deactivateWebdev();
+    test('with webdev not activated', () async {
+      await deactivateWebdev();
       expect(getGlobalWebdevVersion(), isNull);
     });
 
-    test('with webdev activated', () {
-      activateWebdev('2.0.0');
+    test('with webdev activated', () async {
+      await activateWebdev('2.0.0');
       expect(getGlobalWebdevVersion(), Version.parse('2.0.0'));
     });
   });
 
-  test('printWebdevServeHelp', () {
-    activateWebdev('2.0.0');
+  test('printWebdevServeHelp', () async {
+    await activateWebdev(webdevCompatibility.toString());
     expect(printWebdevServeHelp(), completion(0));
-  }, timeout: Timeout(Duration(seconds: 20)));
+  });
 }

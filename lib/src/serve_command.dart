@@ -23,9 +23,11 @@ import 'package:pedantic/pedantic.dart';
 import 'package:webdev_proxy/src/command_runner.dart';
 import 'package:webdev_proxy/src/command_utils.dart';
 import 'package:webdev_proxy/src/logging.dart';
+import 'package:webdev_proxy/src/port_utils.dart';
 import 'package:webdev_proxy/src/webdev_arg_utils.dart';
 import 'package:webdev_proxy/src/webdev_proc_utils.dart';
 import 'package:webdev_proxy/src/webdev_proxy_server.dart';
+import 'package:webdev_proxy/src/webdev_server.dart';
 
 /// The `serve` command for the [WebdevProxy] command-runner.
 ///
@@ -115,16 +117,18 @@ class ServeCommand extends Command<int> {
     // Parse the directory:port mappings that will be used by the proxy servers.
     // Each proxy will be mapped to a `webdev serve` instance on another port.
     final portsToServeByDir = parseDirectoryArgs(argResults.rest);
-    var baseWebdevPort = 9111;
+
+    // Find open ports for each of the directories to be served by webdev.
     final portsToProxyByDir = {
-      for (final dir in portsToServeByDir.keys) '$dir': baseWebdevPort++,
+      for (final dir in portsToServeByDir.keys)
+        dir: await findAndReleaseOpenPort()
     };
 
     // Start the underlying `webdev serve` process.
-    final webdevExitCode = startWebdevServe([
+    final webdevServer = await WebdevServer.start([
       ...argResults.rest,
       if (hostname != 'localhost') '--hostname=$hostname',
-      for (final dir in portsToProxyByDir.keys)
+      for (final dir in portsToServeByDir.keys)
         '$dir:${portsToProxyByDir[dir]}',
     ]);
 
@@ -139,7 +143,7 @@ class ServeCommand extends Command<int> {
             )));
 
     // Stop proxies and exit if webdev exits.
-    unawaited(webdevExitCode.then((code) async {
+    unawaited(webdevServer.exitCode.then((code) async {
       log.info('Terminating proxy because webdev serve exited.\n');
       await Future.wait(proxies.map((proxy) => proxy.close()));
       exit(code);
@@ -147,6 +151,7 @@ class ServeCommand extends Command<int> {
 
     // Stop proxies and exit on user interrupt.
     unawaited(ProcessSignal.sigint.watch().first.then((_) async {
+      await webdevServer.close();
       await Future.wait(proxies.map((proxy) => proxy.close()));
       exit(0);
     }));

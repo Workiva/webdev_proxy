@@ -17,32 +17,34 @@ import 'dart:io';
 
 import 'package:test/test.dart';
 
-void activateWebdev(String constraint) {
-  final procResult = Process.runSync(
+Future<Null> activateWebdev(String constraint) async {
+  final process = await Process.start(
     'pub',
     ['global', 'activate', 'webdev', constraint],
+    mode: ProcessStartMode.inheritStdio,
   );
-  expect(procResult.exitCode, 0,
-      reason: 'Failed to global activate webdev $constraint:\n'
-          '${procResult.stdout}');
+  expect(await process.exitCode, 0,
+      reason: 'Failed to global activate webdev $constraint.');
   expect(isWebdevGlobalActivated(), isTrue,
       reason: "Webdev should be globally active, but isn't.");
 }
 
-void deactivateWebdev() {
+Future<Null> deactivateWebdev() async {
   if (!isWebdevGlobalActivated()) {
     return;
   }
-  final procResult = Process.runSync(
+  final process = await Process.start(
     'pub',
     ['global', 'deactivate', 'webdev'],
+    mode: ProcessStartMode.inheritStdio,
   );
-  expect(procResult.exitCode, 0,
-      reason: 'Failed to global deactivate webdev:\n'
-          '${procResult.stdout}');
+  expect(await process.exitCode, 0,
+      reason: 'Failed to global deactivate webdev.');
   expect(isWebdevGlobalActivated(), isFalse,
       reason: 'Webdev should not be globally active, but is.');
 }
+
+final webdevGlobalPattern = RegExp(r'webdev [\d.]+');
 
 bool isWebdevGlobalActivated() {
   final procResult = Process.runSync(
@@ -50,5 +52,8 @@ bool isWebdevGlobalActivated() {
     ['global', 'list'],
     stdoutEncoding: utf8,
   );
-  return procResult.stdout.toString().contains('webdev');
+  return procResult.stdout
+      .toString()
+      .split('\n')
+      .any(webdevGlobalPattern.hasMatch);
 }

@@ -1,3 +1,2 @@
 concurrency: 1
 reporter: expanded
-timeout: 5s

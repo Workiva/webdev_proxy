@@ -35,6 +35,12 @@ class WebdevProxyServer {
   /// Returns the port that this server is listening on.
   int get port => _server.port;
 
+  /// Permanently stops this proxy server from listening for new connections and
+  /// closes all active connections immediately.
+  Future<Null> close() async {
+    await _server.close(force: true);
+  }
+
   /// Starts a proxy for a webdev server that is serving [dir] and listening on
   /// [hostname] and [portToProxy].
   ///
@@ -76,11 +82,5 @@ class WebdevProxyServer {
         '\n');
     log.fine('... forwards to http://$serverHostname:$portToProxy');
     return WebdevProxyServer._(server);
-  }
-
-  /// Permanently stops this proxy server from listening for new connections and
-  /// closes all active connections immediately.
-  Future<Null> close() async {
-    await _server.close(force: true);
   }
 }

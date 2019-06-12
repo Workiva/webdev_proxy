@@ -16,7 +16,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:logging/logging.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf_proxy/shelf_proxy.dart' as shelf_proxy;
 
@@ -36,7 +35,6 @@ String _sseHeaders(String origin) => 'HTTP/1.1 200 OK\r\n'
 class SseProxyHandler {
   final _httpClient = http.Client();
   shelf.Handler _incomingMessageProxyHandler;
-  final _logger = Logger('SseProxyHandler');
   final String _proxyName;
   final Uri _proxyUri;
   final Uri _serverUri;
