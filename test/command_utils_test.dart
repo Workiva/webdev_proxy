@@ -53,7 +53,7 @@ void main() {
     });
 
     group('reports usage exception if', () {
-      test('-- separator is missing', () {
+      test('-- separator is missing before webdev args', () {
         final argResults = argParser.parse(['command', 'foo']);
         assertNoPositionalArgsBeforeSeparator(
             'serve', argResults.command, usageException);
