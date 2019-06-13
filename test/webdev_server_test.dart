@@ -16,10 +16,17 @@
 import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
 import 'package:webdev_proxy/src/port_utils.dart';
+import 'package:webdev_proxy/src/webdev_proc_utils.dart';
 import 'package:webdev_proxy/src/webdev_server.dart';
+
+import 'util.dart';
 
 void main() async {
   WebdevServer webdevServer;
+
+  setUpAll(() async {
+    await activateWebdev(webdevCompatibility.toString());
+  });
 
   tearDown(() async {
     await webdevServer?.close();
