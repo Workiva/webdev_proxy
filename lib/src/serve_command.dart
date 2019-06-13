@@ -103,12 +103,12 @@ class ServeCommand extends Command<int> {
       return ExitCode.usage.code;
     }
 
-    // This command doesn't allow overriding the formatter inputs or specifying
-    // any arguments at the dart_dev level. Instead arguments should be passed
-    // after the `--` separator.
+    // This command doesn't allow specifying any arguments at the webdev_proxy
+    // level. Instead arguments should be passed to the `webdev` process by
+    // passing them after the `--` separator.
     //
-    // Here we validate that [argResults.rest] is exactly equal to all the
-    // arguments after the `--`.
+    // To enforce this, we validate that [argResults.rest] is exactly equal to
+    // all the arguments after the `--`.
     assertNoPositionalArgsBeforeSeparator(name, argResults, usageException);
 
     // Parse the hostname to serve each dir on (defaults to 0.0.0.0)
