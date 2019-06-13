@@ -1,0 +1,42 @@
+name: webdev_proxy
+version: 0.0.0
+private: true
+homepage: https://github.com/Workiva/webdev_proxy
+
+description: >
+  A simple HTTP proxy for webdev's serve command. Supports apps that use HTML5
+  routing by rewriting 404s to the root index.
+
+authors:
+  - Workiva Client Platform Team <clientplatform@workiva.com>
+  - Evan Weible <evan.weible@workiva.com>
+
+environment:
+  sdk: ">=2.3.0 <3.0.0"
+
+dependencies:
+  args: ^1.5.1
+  glob: ^1.1.7
+  http: ^0.12.0
+  http_multi_server: ^2.1.0
+  io: ^0.3.3
+  logging: ^0.11.3+2
+  meta: ^1.1.7
+  pedantic: ^1.7.0
+  pub_semver: ^1.4.2
+  shelf: ^0.7.2
+  shelf_proxy: ^0.1.0
+  stack_trace: ^1.9.3
+
+dev_dependencies:
+  # These two build deps are required by webdev.
+  build_runner: ^1.5.1
+  build_web_compilers: '>=1.2.2 <3.0.0'
+
+  shelf_static: ^0.2.8
+  sse: ^2.0.2
+  test: ^1.6.3
+  webdriver: ^2.0.0
+
+executables:
+  webdev_proxy:
