@@ -43,5 +43,10 @@ void main() {
     test('ports omitted', () {
       expect(parseDirectoryArgs(['web', 'test']), {'web': 8080, 'test': 8081});
     });
+
+    test('nested directory', () {
+      expect(parseDirectoryArgs(['web/nested/dir/:9000']),
+          {'web/nested/dir/': 9000});
+    });
   });
 }

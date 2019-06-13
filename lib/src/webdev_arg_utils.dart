@@ -13,7 +13,15 @@
 // limitations under the License.
 
 final _defaultWebDirs = const ['web'];
-final _dirPattern = RegExp(r'^(\w+)(?::(\d+))?$');
+final _dirPattern = RegExp(
+    // Matches and captures any directory path, e.g. `web` or `test/nested/dir/`
+    r'^([\w/]+)'
+    // Optional non-capturing group since webdev allows for the port to be omitted
+    r'(?:'
+    // Matches and captures any port, e.g. `:8080` or `:9001`
+    r':(\d+)'
+    // Ends the optional non-capturing group
+    r')?$');
 
 /// Returns a mapping of directories to ports parsed from command-line [args] in
 /// the form of `<directory>:<port>`.
