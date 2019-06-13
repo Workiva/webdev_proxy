@@ -111,6 +111,31 @@ class ServeCommand extends Command<int> {
     // all the arguments after the `--`.
     assertNoPositionalArgsBeforeSeparator(name, argResults, usageException);
 
+    final exitCodeCompleter = Completer<int>();
+    var interruptReceived = false;
+    final proxies = <WebdevProxyServer>[];
+    var proxiesFailed = false;
+    StreamSubscription sigintSub;
+    WebdevServer webdevServer;
+
+    void shutDown(int code) async {
+      await Future.wait([
+        sigintSub?.cancel(),
+        webdevServer?.close(),
+        ...proxies.map((proxy) => proxy.close()),
+      ]);
+      if (!exitCodeCompleter.isCompleted) {
+        exitCodeCompleter.complete(code);
+      }
+    }
+
+    // Shutdown everything and exit on user interrupt.
+    sigintSub = ProcessSignal.sigint.watch().listen((_) {
+      interruptReceived = true;
+      log.info('Interrupt received, exiting.\n');
+      shutDown(ExitCode.success.code);
+    });
+
     // Parse the hostname to serve each dir on (defaults to 0.0.0.0)
     final hostname = parseHostname(argResults.rest);
 
@@ -125,37 +150,42 @@ class ServeCommand extends Command<int> {
     };
 
     // Start the underlying `webdev serve` process.
-    final webdevServer = await WebdevServer.start([
+    webdevServer = await WebdevServer.start([
       ...argResults.rest,
       if (hostname != 'localhost') '--hostname=$hostname',
       for (final dir in portsToServeByDir.keys)
         '$dir:${portsToProxyByDir[dir]}',
     ]);
 
-    // Start a proxy server for each directory.
-    final proxies = await Future.wait(
-        portsToServeByDir.keys.map((dir) => WebdevProxyServer.start(
-              dir: dir,
-              hostname: hostname,
-              portToProxy: portsToProxyByDir[dir],
-              portToServe: portsToServeByDir[dir],
-              rewrite404s: argResults[rewrite404sFlag] == true,
-            )));
-
     // Stop proxies and exit if webdev exits.
-    unawaited(webdevServer.exitCode.then((code) async {
-      log.info('Terminating proxy because webdev serve exited.\n');
-      await Future.wait(proxies.map((proxy) => proxy.close()));
-      exit(code);
+    unawaited(webdevServer.exitCode.then((code) {
+      if (!interruptReceived && !proxiesFailed) {
+        log.info('Terminating proxy because webdev serve exited.\n');
+        shutDown(code);
+      }
     }));
 
-    // Stop proxies and exit on user interrupt.
-    unawaited(ProcessSignal.sigint.watch().first.then((_) async {
-      await webdevServer.close();
-      await Future.wait(proxies.map((proxy) => proxy.close()));
-      exit(0);
-    }));
+    // Start a proxy server for each directory.
+    for (final dir in portsToServeByDir.keys) {
+      try {
+        proxies.add(await WebdevProxyServer.start(
+          dir: dir,
+          hostname: hostname,
+          portToProxy: portsToProxyByDir[dir],
+          portToServe: portsToServeByDir[dir],
+          rewrite404s: argResults[rewrite404sFlag] == true,
+        ));
+      } catch (e, stackTrace) {
+        proxiesFailed = true;
+        log.severe(
+            'Failed to start proxy server on port ${portsToServeByDir[dir]}',
+            e,
+            stackTrace);
+        shutDown(ExitCode.unavailable.code);
+        break;
+      }
+    }
 
-    return Completer<int>().future;
+    return exitCodeCompleter.future;
   }
 }
