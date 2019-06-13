@@ -60,7 +60,7 @@ void main() {
         expect(capturedUsageException, isNotNull);
       });
 
-      test('args exist before -- separator', () {
+      test('positional args exist before -- separator', () {
         final argResults =
             argParser.parse(['command', 'before', '--', 'after']);
         assertNoPositionalArgsBeforeSeparator(
