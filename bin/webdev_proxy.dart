@@ -18,5 +18,5 @@ import 'package:webdev_proxy/src/executable.dart' as executable;
 
 /// Entrypoint for the `webdev_proxy` executable.
 void main(List<String> args) async {
-  exitCode = await executable.run(args);
+  exit(await executable.run(args));
 }
