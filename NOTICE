@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,17 +15,19 @@ limitations under the License.
 
 --------------------------------------------------
 
-This dart_codemod software includes a number of subcomponents with
+This webdev_proxy software is based on a number of software repositories with
 separate copyright notices and/or license terms. Your use of the source
-code for the these subcomponents is subject to the terms and
+code for the these software repositories is subject to the terms and
 conditions of the following licenses:
 
-Dart-lang build software: https://github.com/dart-lang/build
-Copyright ©2016 Dart project authors.
+build: https://github.com/dart-lang/build
+Copyright ©2016 Dart project authors. All rights reserved.
 Licensed under the BSD 3-Clause License: https://github.com/dart-lang/build/blob/master/LICENSE
 
-Dart-lang sse software: https://github.com/dart-lang/sse
-Copyright ©2019 Dart project authors.
-Licensed under the BSD 3-Clause License: https://github.com/dart-lang/sse/blob/master/LICENSE
+webdev: https://github.com/dart-lang/webdev
+Copyright ©2017 Dart project authors. All rights reserved.
+Licensed under the BSD-3 Clause License: https://github.com/dart-lang/webdev/blob/master/webdev/LICENSE
 
---------------------------------------------------
+sse: https://github.com/dart-lang/sse
+Copyright ©2019 Dart project authors. All rights reserved.
+Licensed under the BSD-3 Clause License: https://github.com/dart-lang/sse/blob/master/LICENSE
