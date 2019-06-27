@@ -13,8 +13,9 @@ addons:
       - google-chrome-stable
 
 dart:
+  - 2.3.2
+  - stable
   - dev
-  - 2.4.0
 
 with_content_shell: false
 
