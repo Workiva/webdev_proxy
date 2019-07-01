@@ -33,6 +33,10 @@ import 'package:webdev_proxy/src/webdev_server.dart';
 ///
 /// Runs `webdev serve` behind a simple HTTP proxy.
 class ServeCommand extends Command<int> {
+  static const defaultDescription = 'Run `webdev serve` (a local web '
+      'development server) behind a proxy that supports HTML5 routing by '
+      ' rewriting not-found requests to index.html.';
+
   static const rewrite404sFlag = 'rewrite-404s';
 
   ServeCommand() {
@@ -42,9 +46,7 @@ class ServeCommand extends Command<int> {
   }
 
   @override
-  String get description =>
-      'Run `webdev serve` (a local web development server) behind a proxy that '
-      'supports HTML5 routing by rewriting not-found requests to index.html.';
+  String get description => defaultDescription;
 
   @override
   String get invocation =>

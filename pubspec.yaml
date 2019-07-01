@@ -14,8 +14,13 @@ authors:
 environment:
   sdk: ">=2.3.2 <3.0.0"
 
+dependency_overrides:
+  dart_dev:
+    path: ../dart_dev_v3
+
 dependencies:
   args: ^1.5.1
+  dart_dev: ^3.0.0
   glob: ^1.1.7
   http: ^0.12.0
   http_multi_server: ^2.1.0
