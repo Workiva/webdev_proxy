@@ -13,20 +13,86 @@
 // limitations under the License.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:io/ansi.dart';
 import 'package:io/io.dart' show ExitCode;
+import 'package:path/path.dart' as p;
+import 'package:shelf/shelf.dart';
 
-import 'package:webdev_proxy/src/command_runner.dart';
+import 'command_runner.dart';
+import 'dart_tool_cache.dart';
+import 'ensure_process_exit.dart';
+
+typedef _HandlersGetter = Iterable<Handler> Function();
+
+const _customWebdevProxyDartPath = 'tool/webdev_proxy.dart';
+final _customEntrypointPath = p.join(cacheDirPath, 'custom_executable.dart');
+final _customEntrypoint = File(_customEntrypointPath);
+final _relativeWebdevProxyDartPath = p.relative(
+  p.absolute(_customWebdevProxyDartPath),
+  from: p.absolute(p.dirname(_customEntrypointPath)),
+);
+final _customEntrypointContents = '''
+import 'dart:io';
+
+import 'package:webdev_proxy/src/executable.dart' as executable;
+import '$_relativeWebdevProxyDartPath' as custom_webdev_proxy;
+
+void main(List<String> args) async {
+  exit(await executable.runWithConfig(args, () => custom_webdev_proxy.handlers));
+}
+''';
 
 /// Runs the [WebdevProxy] command-runner and returns its exit code.
 ///
 /// Also catches and prints [UsageException]s.
 Future<int> run(List<String> args) async {
+  if (File(_customWebdevProxyDartPath).existsSync()) {
+    return runViaCustomEntrypoint(args);
+  }
+  return _run(args);
+}
+
+Future<int> runWithConfig(
+    List<String> args, _HandlersGetter handlersGetter) async {
+  Iterable<Handler> customHandlers;
+  try {
+    customHandlers = handlersGetter();
+  } catch (_) {}
+  return _run(args, customHandlers: customHandlers);
+}
+
+Future<int> runViaCustomEntrypoint(List<String> args) async {
+  _generateCustomEntrypoint();
+  final process = await Process.start(
+      Platform.executable,
+      [
+        _customEntrypointPath,
+        ...args,
+      ],
+      mode: ProcessStartMode.inheritStdio);
+  ensureProcessExit(process);
+  return process.exitCode;
+}
+
+void _generateCustomEntrypoint() {
+  if (_shouldWriteCustomEntrypoint()) {
+    createCacheDir();
+    _customEntrypoint.writeAsStringSync(_customEntrypointContents);
+  }
+}
+
+bool _shouldWriteCustomEntrypoint() {
+  return !_customEntrypoint.existsSync() ||
+      _customEntrypoint.readAsStringSync() != _customEntrypointContents;
+}
+
+Future<int> _run(List<String> args, {Iterable<Handler> customHandlers}) async {
   try {
     // Explicitly `await` here so we can catch any usage exceptions.
-    return await WebdevProxy().run(args);
+    return await WebdevProxy(customHandlers: customHandlers).run(args);
   } on UsageException catch (e) {
     print(red.wrap(e.message));
     print('');

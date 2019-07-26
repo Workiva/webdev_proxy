@@ -1,0 +1,12 @@
+name: webdev_proxy_example
+version: 0.0.0
+private: true
+
+dev_dependencies:
+  # These two build deps are required by webdev.
+  build_runner: ^1.5.1
+  build_web_compilers: '>=1.2.2 <3.0.0'
+
+  shelf: ^0.7.2
+  webdev_proxy:
+    path: ..

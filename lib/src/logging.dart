@@ -50,7 +50,7 @@ StringBuffer colorLog(LogRecord record, {bool verbose}) {
   }
 
   if (record.stackTrace != null && verbose) {
-    final trace = new Trace.from(record.stackTrace).terse;
+    final trace = Trace.from(record.stackTrace).terse;
     lines.add(trace);
   }
 

@@ -121,4 +121,20 @@ void main() {
         await http.get('http://localhost:${proxy.port}/path/to/nothing');
     expect(response.statusCode, 404);
   });
+
+  test('Prepends custom handlers to the cascade', () async {
+    shelf.Response serverErrorHandler(shelf.Request request) =>
+        shelf.Response.internalServerError();
+
+    proxy = await WebdevProxyServer.start(
+      customHandlers: [serverErrorHandler],
+      dir: 'test',
+      hostname: 'localhost',
+      portToProxy: server.port,
+      rewrite404s: false,
+    );
+
+    final response = await http.get('http://localhost:${proxy.port}/');
+    expect(response.statusCode, 500);
+  });
 }

@@ -19,6 +19,7 @@ import 'package:args/command_runner.dart';
 import 'package:io/ansi.dart';
 import 'package:io/io.dart';
 import 'package:pedantic/pedantic.dart';
+import 'package:shelf/shelf.dart';
 
 import 'package:webdev_proxy/src/command_runner.dart';
 import 'package:webdev_proxy/src/command_utils.dart';
@@ -35,7 +36,10 @@ import 'package:webdev_proxy/src/webdev_server.dart';
 class ServeCommand extends Command<int> {
   static const rewrite404sFlag = 'rewrite-404s';
 
-  ServeCommand() {
+  final Iterable<Handler> _customHandlers;
+
+  ServeCommand({Iterable<Handler> customHandlers})
+      : _customHandlers = customHandlers {
     argParser.addFlag(rewrite404sFlag,
         defaultsTo: true,
         help: 'Rewrite every request that returns a 404 to /index.html');
@@ -169,6 +173,7 @@ class ServeCommand extends Command<int> {
     for (final dir in portsToServeByDir.keys) {
       try {
         proxies.add(await WebdevProxyServer.start(
+          customHandlers: _customHandlers,
           dir: dir,
           hostname: hostname,
           portToProxy: portsToProxyByDir[dir],

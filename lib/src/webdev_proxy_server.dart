@@ -18,6 +18,7 @@ import 'package:http_multi_server/http_multi_server.dart';
 import 'package:io/ansi.dart';
 import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart' as shelf;
+import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_proxy/shelf_proxy.dart' as shelf_proxy;
 import 'package:webdev_proxy/src/proxy_root_index_handler.dart';
@@ -54,6 +55,7 @@ class WebdevProxyServer {
     @required String dir,
     @required String hostname,
     @required int portToProxy,
+    Iterable<Handler> customHandlers,
     int portToServe,
     bool rewrite404s,
   }) async {
@@ -67,7 +69,11 @@ class WebdevProxyServer {
 
     final proxyHandler =
         shelf_proxy.proxyHandler(serverUri, proxyName: 'webdev_proxy');
-    var cascade = shelf.Cascade()
+    var cascade = shelf.Cascade();
+    for (final handler in customHandlers ?? []) {
+      cascade = cascade.add(handler);
+    }
+    cascade = cascade
         .add(SseProxyHandler(sseUri, serverSseUri).handler)
         .add(proxyHandler);
     if (rewrite404s) {
