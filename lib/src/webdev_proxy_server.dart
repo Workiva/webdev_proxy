@@ -56,32 +56,49 @@ class WebdevProxyServer {
     @required String hostname,
     @required int portToProxy,
     Iterable<Handler> customHandlers,
+    Iterable<Middleware> customMiddleware,
     int portToServe,
     bool rewrite404s,
   }) async {
+    customHandlers ??= [];
+    customMiddleware ??= [];
     portToServe ??= 0;
     rewrite404s ??= true;
 
+    // Construct our handler using a Cascade and starting with custom handlers
+    // if any were provided.
+    var cascade = shelf.Cascade();
+    for (final customHandler in customHandlers ?? []) {
+      cascade = cascade.add(customHandler);
+    }
+
+    // Add the proxy handler for the `/$sseHandler` route to the cascade.
     final serverHostname = hostname == 'any' ? 'localhost' : hostname;
     final serverUri = Uri.parse('http://$serverHostname:$portToProxy');
     final serverSseUri = serverUri.replace(path: r'/$sseHandler');
     final sseUri = Uri.parse(r'/$sseHandler');
+    cascade = cascade.add(SseProxyHandler(sseUri, serverSseUri).handler);
 
+    // Add the default handler for all requests that proxies the webdev server.
     final proxyHandler =
         shelf_proxy.proxyHandler(serverUri, proxyName: 'webdev_proxy');
-    var cascade = shelf.Cascade();
-    for (final handler in customHandlers ?? []) {
-      cascade = cascade.add(handler);
-    }
-    cascade = cascade
-        .add(SseProxyHandler(sseUri, serverSseUri).handler)
-        .add(proxyHandler);
+    cascade = cascade.add(proxyHandler);
+
+    // Add the 404-to-root-index rewrite handler, if enabled.
     if (rewrite404s) {
       cascade = cascade.add(proxyRootIndexHandler(proxyHandler));
     }
 
+    // Construct our final handler by creating a pipeline with custom middleware
+    // (if any were provided) and our cascade handler.
+    var pipeline = Pipeline();
+    for (final middleware in customMiddleware) {
+      pipeline = pipeline.addMiddleware(middleware);
+    }
+    final handler = pipeline.addHandler(cascade.handler);
+
     final server = await HttpMultiServer.bind(hostname, portToServe);
-    shelf_io.serveRequests(server, cascade.handler);
+    shelf_io.serveRequests(server, handler);
     final proxyHostname = hostname == 'any' ? '::' : hostname;
     log.info(green.wrap('Serving `$dir` proxy on '
             'http://$proxyHostname:$portToServe') +

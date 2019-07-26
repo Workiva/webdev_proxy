@@ -37,9 +37,12 @@ class ServeCommand extends Command<int> {
   static const rewrite404sFlag = 'rewrite-404s';
 
   final Iterable<Handler> _customHandlers;
+  final Iterable<Middleware> _customMiddleware;
 
-  ServeCommand({Iterable<Handler> customHandlers})
-      : _customHandlers = customHandlers {
+  ServeCommand(
+      {Iterable<Handler> customHandlers, Iterable<Middleware> customMiddleware})
+      : _customHandlers = customHandlers,
+        _customMiddleware = customMiddleware {
     argParser.addFlag(rewrite404sFlag,
         defaultsTo: true,
         help: 'Rewrite every request that returns a 404 to /index.html');
@@ -174,6 +177,7 @@ class ServeCommand extends Command<int> {
       try {
         proxies.add(await WebdevProxyServer.start(
           customHandlers: _customHandlers,
+          customMiddleware: _customMiddleware,
           dir: dir,
           hostname: hostname,
           portToProxy: portsToProxyByDir[dir],

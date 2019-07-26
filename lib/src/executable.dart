@@ -26,6 +26,7 @@ import 'dart_tool_cache.dart';
 import 'ensure_process_exit.dart';
 
 typedef _HandlersGetter = Iterable<Handler> Function();
+typedef _MiddlewareGetter = Iterable<Middleware> Function();
 
 const _customWebdevProxyDartPath = 'tool/webdev_proxy.dart';
 final _customEntrypointPath = p.join(cacheDirPath, 'custom_executable.dart');
@@ -41,7 +42,9 @@ import 'package:webdev_proxy/src/executable.dart' as executable;
 import '$_relativeWebdevProxyDartPath' as custom_webdev_proxy;
 
 void main(List<String> args) async {
-  exit(await executable.runWithConfig(args, () => custom_webdev_proxy.handlers));
+  exit(await executable.runWithConfig(args,
+      () => custom_webdev_proxy.handlers,
+      () => custom_webdev_proxy.middleware));
 }
 ''';
 
@@ -55,13 +58,18 @@ Future<int> run(List<String> args) async {
   return _run(args);
 }
 
-Future<int> runWithConfig(
-    List<String> args, _HandlersGetter handlersGetter) async {
+Future<int> runWithConfig(List<String> args, _HandlersGetter handlersGetter,
+    _MiddlewareGetter middlewareGetter) async {
   Iterable<Handler> customHandlers;
+  Iterable<Middleware> customMiddleware;
   try {
     customHandlers = handlersGetter();
   } catch (_) {}
-  return _run(args, customHandlers: customHandlers);
+  try {
+    customMiddleware = middlewareGetter();
+  } catch (_) {}
+  return _run(args,
+      customHandlers: customHandlers, customMiddleware: customMiddleware);
 }
 
 Future<int> runViaCustomEntrypoint(List<String> args) async {
@@ -89,10 +97,14 @@ bool _shouldWriteCustomEntrypoint() {
       _customEntrypoint.readAsStringSync() != _customEntrypointContents;
 }
 
-Future<int> _run(List<String> args, {Iterable<Handler> customHandlers}) async {
+Future<int> _run(List<String> args,
+    {Iterable<Handler> customHandlers,
+    Iterable<Middleware> customMiddleware}) async {
   try {
     // Explicitly `await` here so we can catch any usage exceptions.
-    return await WebdevProxy(customHandlers: customHandlers).run(args);
+    return await WebdevProxy(
+            customHandlers: customHandlers, customMiddleware: customMiddleware)
+        .run(args);
   } on UsageException catch (e) {
     print(red.wrap(e.message));
     print('');
