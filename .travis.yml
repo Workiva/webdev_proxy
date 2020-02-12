@@ -1,19 +1,9 @@
 language: dart
-
-# This is necessary to use proper Chrome. Travis's version of chromium is from
-# 2014.
 sudo: required
-dist: trusty
 addons:
   chrome: stable
-  apt:
-    sources:
-      - google-chrome
-    packages:
-      - google-chrome-stable
 
 dart:
-  - 2.3.2
   - stable
   - dev
 
