@@ -17,7 +17,7 @@ before_install:
   - /usr/bin/google-chrome --version
 
 before_script:
-  - wget http://chromedriver.storage.googleapis.com/2.46/chromedriver_linux64.zip
+  - wget http://chromedriver.storage.googleapis.com/2.9/chromedriver_linux64.zip
   - unzip chromedriver_linux64.zip
   - export PATH=$PATH:$PWD
   - pub get
