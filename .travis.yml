@@ -2,6 +2,8 @@ language: dart
 sudo: required
 addons:
   chrome: stable
+services:
+  - xvfb
 
 dart:
   - stable
