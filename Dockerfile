@@ -4,4 +4,5 @@ WORKDIR /build/
 ADD pubspec.yaml .
 RUN pub get
 ARG BUILD_ARTIFACTS_BUILD=/build/pubspec.lock
+
 FROM scratch
