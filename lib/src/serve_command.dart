@@ -147,8 +147,7 @@ class ServeCommand extends Command<int> {
 
     // Find open ports for each of the directories to be served by webdev.
     final portsToProxyByDir = {
-      for (final dir in portsToServeByDir.keys)
-        dir: await findAndReleaseOpenPort()
+      for (final dir in portsToServeByDir.keys) dir: await findUnusedPort()
     };
 
     // Start the underlying `webdev serve` process.

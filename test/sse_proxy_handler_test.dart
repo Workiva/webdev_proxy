@@ -7,29 +7,21 @@ import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_static/shelf_static.dart';
 import 'package:sse/server/sse_handler.dart';
 import 'package:test/test.dart';
+import 'package:webdev_proxy/src/port_utils.dart';
 import 'package:webdriver/io.dart';
 
 import 'package:webdev_proxy/src/sse_proxy_handler.dart';
 
+import 'chromedriver_utils.dart';
+
 void main() {
-  Process chromeDriver;
   HttpServer proxy;
   HttpServer server;
   SseHandler serverSse;
   WebDriver webdriver;
 
   setUpAll(() async {
-    try {
-      chromeDriver = await Process.start(
-          'chromedriver', ['--port=4444', '--url-base=wd/hub']);
-    } catch (e) {
-      throw StateError(
-          'Could not start ChromeDriver. Is it installed?\nError: $e');
-    }
-  });
-
-  tearDownAll(() {
-    chromeDriver.kill();
+    await startChromeDriver();
   });
 
   setUp(() async {
@@ -40,7 +32,8 @@ void main() {
 
     serverSse = SseHandler(Uri.parse(ssePath));
     final serverCascade = shelf.Cascade().add(serverSse.handler);
-    server = await io.serve(serverCascade.handler, 'localhost', 0);
+    server = await io.serve(
+        serverCascade.handler, 'localhost', await findUnusedPort());
 
     final proxySse = SseProxyHandler(Uri.parse(ssePath),
         Uri.parse('http://localhost:${server.port}$ssePath'));
@@ -48,17 +41,13 @@ void main() {
         .add(proxySse.handler)
         .add(_faviconHandler)
         .add(staticWebHandler);
-    proxy = await io.serve(proxyCascade.handler, 'localhost', 0);
+    proxy = await io.serve(
+        proxyCascade.handler, 'localhost', await findUnusedPort());
 
-    webdriver = await createDriver(desired: {
-      'chromeOptions': {
-        'args': ['--headless']
-      }
-    });
+    webdriver = await createWebDriver();
   });
 
   tearDown(() async {
-    await webdriver.quit();
     await proxy.close();
     await server.close();
   });
@@ -73,9 +62,13 @@ void main() {
   test('Multiple clients can connect', () async {
     var connections = serverSse.connections;
     await webdriver.get('http://localhost:${proxy.port}');
-    await connections.next;
+    var conn1 = await connections.next;
+    conn1.sink.add('one');
+    expect(await conn1.stream.first, 'one');
     await webdriver.get('http://localhost:${proxy.port}');
-    await connections.next;
+    var conn2 = await connections.next;
+    conn2.sink.add('two');
+    expect(await conn2.stream.first, 'two');
   });
 
   test('Routes data correctly', () async {
