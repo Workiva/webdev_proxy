@@ -34,9 +34,9 @@ dev_dependencies:
   build_web_compilers: '>=1.2.2 <3.0.0'
 
   shelf_static: ^0.2.8
-  sse: ^2.0.2
+  sse: ^3.6.1
   test: ^1.6.3
-  webdriver: ^2.0.0
+  webdriver: ^3.0.0
 
 executables:
   webdev_proxy:
