@@ -1,0 +1,36 @@
+name: Dart CI
+
+on:
+  push:
+    branches:
+      - 'master'
+      - 'test_consume_*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sdk: [ 2.7.2, stable, dev ]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dart-lang/setup-dart@v0.2
+        with:
+          sdk: ${{ matrix.sdk }}
+
+      - name: Install dependencies
+        run: pub get
+
+      - name: Formatting
+        run: dartfmt -n --set-exit-if-changed .
+        if: always() && ${{ matrix.sdk }} == '2.7.2'
+
+      - name: Analysis
+        run: dartanalyzer .
+
+      - name: Tests
+        run: pub run test
