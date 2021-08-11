@@ -19,7 +19,7 @@ import 'package:args/args.dart';
 void assertNoPositionalArgsBeforeSeparator(
   String command,
   ArgResults argResults,
-  void usageException(String msg),
+  void Function(String msg) usageException,
 ) {
   if (argResults.rest.isEmpty) {
     return;

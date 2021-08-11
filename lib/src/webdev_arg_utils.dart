@@ -54,7 +54,7 @@ Map<String, int> parseDirectoryArgs(List<String> args) {
 ///
 /// Otherwise, returns a default of `'localhost'`.
 ParseHostnameResults parseHostname(List<String> args) {
-  String hostname = 'localhost';
+  var hostname = 'localhost';
   final remainingArgs = <String>[];
   var skipNext = false;
   for (var i = 0; i < args.length; i++) {

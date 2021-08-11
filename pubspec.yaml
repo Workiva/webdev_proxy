@@ -7,10 +7,6 @@ description: >
   A simple HTTP proxy for webdev's serve command. Supports apps that use HTML5
   routing by rewriting 404s to the root index.
 
-authors:
-  - Workiva Client Platform Team <clientplatform@workiva.com>
-  - Evan Weible <evan.weible@workiva.com>
-
 environment:
   sdk: ">=2.3.2 <3.0.0"
 
