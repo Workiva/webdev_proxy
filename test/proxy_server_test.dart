@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:convert';
 @TestOn('vm')
 import 'dart:io';
 
@@ -31,14 +32,27 @@ void main() {
   HttpServer server;
   SseHandler serverSse;
 
-  const chromeDriverUrlBase = 'wd/hub';
-  int chromeDriverPort;
-
   setUpAll(() async {
-    chromeDriverPort = await findUnusedPort();
     try {
-      chromeDriver = await Process.start('chromedriver',
-          ['--port=$chromeDriverPort', '--url-base=$chromeDriverUrlBase']);
+      chromeDriver = await Process.start(
+          'chromedriver', ['--port=4444', '--url-base=wd/hub']);
+
+      // On windows this takes a while to boot up, wait for the first line
+      // of stdout as a signal that it is ready.
+      final stdOutLines = chromeDriver.stdout
+          .transform(utf8.decoder)
+          .transform(LineSplitter())
+          .asBroadcastStream();
+
+      final stdErrLines = chromeDriver.stderr
+          .transform(utf8.decoder)
+          .transform(LineSplitter())
+          .asBroadcastStream();
+
+      stdOutLines.listen((line) => print('ChromeDriver stdout: $line'));
+      stdErrLines.listen((line) => print('ChromeDriver stderr: $line'));
+
+      await stdOutLines.first;
     } catch (e) {
       throw StateError(
           'Could not start ChromeDriver. Is it installed?\nError: $e');
@@ -84,24 +98,15 @@ void main() {
       portToProxy: server.port,
     );
 
-    final debugPort = await findUnusedPort();
     final capabilities = Capabilities.chrome
       ..addAll({
         Capabilities.chromeOptions: {
-          'args': [
-            'remote-debugging-port=$debugPort',
-            '--headless',
-          ],
+          'args': ['--headless'],
         }
       });
-    final webdriver = await createDriver(
-        spec: WebDriverSpec.JsonWire,
-        desired: capabilities,
-        uri: Uri.parse(
-            'http://127.0.0.1:$chromeDriverPort/$chromeDriverUrlBase/'));
-    addTearDown(() async {
-      await webdriver.quit();
-    });
+    final webdriver =
+        await createDriver(spec: WebDriverSpec.JsonWire, desired: capabilities);
+    addTearDown(webdriver.quit);
 
     await webdriver.get('http://localhost:${proxy.port}');
     var connection = await serverSse.connections.next;
@@ -135,22 +140,4 @@ void main() {
         await http.get('http://localhost:${proxy.port}/path/to/nothing');
     expect(response.statusCode, 404);
   });
-}
-
-/// Returns a port that is probably, but not definitely, not in use.
-///
-/// This has a built-in race condition: another process may bind this port at
-/// any time after this call has returned.
-Future<int> findUnusedPort() async {
-  int port;
-  ServerSocket socket;
-  try {
-    socket =
-        await ServerSocket.bind(InternetAddress.loopbackIPv6, 0, v6Only: true);
-  } on SocketException {
-    socket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
-  }
-  port = socket.port;
-  await socket.close();
-  return port;
 }
