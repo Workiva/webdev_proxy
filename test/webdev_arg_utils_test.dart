@@ -86,6 +86,5 @@ void main() {
       expect(result.hostname, '0.0.0.0');
       expect(result.remainingArgs, ['--release']);
     });
-
   });
 }
