@@ -70,7 +70,8 @@ void main() {
     serverSse = SseHandler(Uri.parse(r'/$sseHandler'));
     final serverCascade =
         shelf.Cascade().add(serverSse.handler).add(staticWebHandler);
-    server = await shelf_io.serve(serverCascade.handler, 'localhost', 0);
+    server = await shelf_io.serve(
+        serverCascade.handler, 'localhost', await findUnusedPort());
   });
 
   tearDown(() async {
@@ -83,10 +84,11 @@ void main() {
       dir: 'test',
       hostname: 'localhost',
       portToProxy: server.port,
+      portToServe: await findUnusedPort(),
     );
 
     final response =
-        await http.get('http://localhost:${proxy.port}/index.dart');
+        await http.get('http://127.0.0.1:${proxy.port}/index.dart');
     expect(response.statusCode, 200);
     expect(response.body, isNotEmpty);
   });
@@ -94,9 +96,15 @@ void main() {
   test('Proxies the /\$sseHandler endpoint', () async {
     proxy = await WebdevProxyServer.start(
       dir: 'test',
-      hostname: 'localhost',
+      hostname: '127.0.0.1',
       portToProxy: server.port,
+      portToServe: await findUnusedPort(),
     );
+
+    print(':::PORTS:::');
+    print('proxy: ${proxy.port}');
+    print('server: ${server.port}');
+    print('chromedriver: http://127.0.0.1:4444/wd/hub');
 
     final capabilities = Capabilities.chrome
       ..addAll({
@@ -104,11 +112,13 @@ void main() {
           'args': ['--headless'],
         }
       });
-    final webdriver =
-        await createDriver(spec: WebDriverSpec.JsonWire, desired: capabilities);
+    final webdriver = await createDriver(
+        spec: WebDriverSpec.JsonWire,
+        desired: capabilities,
+        uri: Uri.parse('http://127.0.0.1:4444/wd/hub'));
     addTearDown(webdriver.quit);
 
-    await webdriver.get('http://localhost:${proxy.port}');
+    await webdriver.get('http://127.0.0.1:${proxy.port}');
     var connection = await serverSse.connections.next;
     connection.sink.add('blah');
     expect(await connection.stream.first, 'blah');
@@ -117,13 +127,13 @@ void main() {
   test('Rewrites 404s to /index.html when enabled', () async {
     proxy = await WebdevProxyServer.start(
       dir: 'test',
-      hostname: 'localhost',
+      hostname: '127.0.0.1',
       portToProxy: server.port,
       rewrite404s: true,
     );
 
     final response =
-        await http.get('http://localhost:${proxy.port}/path/to/nothing');
+        await http.get('http://127.0.0.1:${proxy.port}/path/to/nothing');
     expect(response.statusCode, 200);
     expect(response.body, startsWith('<!DOCTYPE html>'));
   });
@@ -131,13 +141,31 @@ void main() {
   test('Does not rewrite 404s to /index.html when disabled', () async {
     proxy = await WebdevProxyServer.start(
       dir: 'test',
-      hostname: 'localhost',
+      hostname: '127.0.0.1',
       portToProxy: server.port,
       rewrite404s: false,
     );
 
     final response =
-        await http.get('http://localhost:${proxy.port}/path/to/nothing');
+        await http.get('http://127.0.0.1:${proxy.port}/path/to/nothing');
     expect(response.statusCode, 404);
   });
+}
+
+/// Returns a port that is probably, but not definitely, not in use.
+///
+/// This has a built-in race condition: another process may bind this port at
+/// any time after this call has returned.
+Future<int> findUnusedPort() async {
+  int port;
+  ServerSocket socket;
+  try {
+    socket =
+        await ServerSocket.bind(InternetAddress.loopbackIPv6, 0, v6Only: true);
+  } on SocketException {
+    socket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+  }
+  port = socket.port;
+  await socket.close();
+  return port;
 }
