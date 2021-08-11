@@ -32,9 +32,10 @@ void main() {
   SseHandler serverSse;
 
   const chromeDriverUrlBase = 'wd/hub';
-  const chromeDriverPort = 4444;
+  int chromeDriverPort;
 
   setUpAll(() async {
+    chromeDriverPort = await findUnusedPort();
     try {
       chromeDriver = await Process.start('chromedriver',
           ['--port=$chromeDriverPort', '--url-base=$chromeDriverUrlBase']);
@@ -83,10 +84,14 @@ void main() {
       portToProxy: server.port,
     );
 
+    final debugPort = await findUnusedPort();
     final capabilities = Capabilities.chrome
       ..addAll({
         Capabilities.chromeOptions: {
-          'args': ['--headless']
+          'args': [
+            'remote-debugging-port=$debugPort',
+            '--headless',
+          ],
         }
       });
     final webdriver = await createDriver(
@@ -130,4 +135,22 @@ void main() {
         await http.get('http://localhost:${proxy.port}/path/to/nothing');
     expect(response.statusCode, 404);
   });
+}
+
+/// Returns a port that is probably, but not definitely, not in use.
+///
+/// This has a built-in race condition: another process may bind this port at
+/// any time after this call has returned.
+Future<int> findUnusedPort() async {
+  int port;
+  ServerSocket socket;
+  try {
+    socket =
+        await ServerSocket.bind(InternetAddress.loopbackIPv6, 0, v6Only: true);
+  } on SocketException {
+    socket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+  }
+  port = socket.port;
+  await socket.close();
+  return port;
 }
