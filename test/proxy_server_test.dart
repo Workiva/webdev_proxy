@@ -31,10 +31,13 @@ void main() {
   HttpServer server;
   SseHandler serverSse;
 
+  const chromeDriverUrlBase = 'wd/hub';
+  const chromeDriverPort = 4444;
+
   setUpAll(() async {
     try {
-      chromeDriver = await Process.start(
-          'chromedriver', ['--port=4444', '--url-base=wd/hub']);
+      chromeDriver = await Process.start('chromedriver',
+          ['--port=$chromeDriverPort', '--url-base=$chromeDriverUrlBase']);
     } catch (e) {
       throw StateError(
           'Could not start ChromeDriver. Is it installed?\nError: $e');
@@ -80,11 +83,17 @@ void main() {
       portToProxy: server.port,
     );
 
-    final webdriver = await createDriver(desired: {
-      'chromeOptions': {
-        'args': ['--headless']
-      }
-    });
+    final capabilities = Capabilities.chrome
+      ..addAll({
+        Capabilities.chromeOptions: {
+          'args': ['--headless']
+        }
+      });
+    final webdriver = await createDriver(
+        spec: WebDriverSpec.JsonWire,
+        desired: capabilities,
+        uri: Uri.parse(
+            'http://127.0.0.1:$chromeDriverPort/$chromeDriverUrlBase/'));
     addTearDown(() async {
       await webdriver.quit();
     });
