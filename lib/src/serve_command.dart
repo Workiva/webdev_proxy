@@ -137,7 +137,9 @@ class ServeCommand extends Command<int> {
     });
 
     // Parse the hostname to serve each dir on (defaults to 0.0.0.0)
-    final hostname = parseHostname(argResults.rest);
+    final hostnameResults = parseHostname(argResults.rest);
+    final hostname = hostnameResults.hostname;
+    final remainingArgs = hostnameResults.remainingArgs;
 
     // Parse the directory:port mappings that will be used by the proxy servers.
     // Each proxy will be mapped to a `webdev serve` instance on another port.
@@ -151,8 +153,8 @@ class ServeCommand extends Command<int> {
 
     // Start the underlying `webdev serve` process.
     webdevServer = await WebdevServer.start([
-      ...argResults.rest,
       if (hostname != 'localhost') '--hostname=$hostname',
+      ...remainingArgs,
       for (final dir in portsToServeByDir.keys)
         '$dir:${portsToProxyByDir[dir]}',
     ]);

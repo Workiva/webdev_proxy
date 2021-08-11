@@ -53,23 +53,34 @@ Map<String, int> parseDirectoryArgs(List<String> args) {
 /// [args] only if it is specified.
 ///
 /// Otherwise, returns a default of `'localhost'`.
-String parseHostname(List<String> args) {
+ParseHostnameResults parseHostname(List<String> args) {
+  String hostname = 'localhost';
+  final remainingArgs = <String>[];
+  var skipNext = false;
   for (var i = 0; i < args.length; i++) {
-    if (!args[i].startsWith('--hostname')) {
+    if (skipNext) {
+      skipNext = false;
       continue;
-    }
-    if (args[i].contains('=')) {
+    } else if (!args[i].startsWith('--hostname')) {
+      remainingArgs.add(args[i]);
+    } else if (args[i].contains('=')) {
       // --hostname=<value>
-      return args[i].split('=')[1];
-    }
-    if (i + 1 < args.length && !args[i + 1].startsWith('-')) {
+      hostname = args[i].split('=')[1];
+    } else if (i + 1 < args.length && !args[i + 1].startsWith('-')) {
       // --hostname <value>
-      return args[i + 1];
+      hostname = args[i + 1];
+      skipNext = true;
     }
   }
-  return 'localhost';
+  return ParseHostnameResults(hostname, remainingArgs);
 
   // TODO: Use when webdev `--hostname=any` support is released
   // HttpMultiServer supports `any` as a more flexible localhost.
   // return 'any';
+}
+
+class ParseHostnameResults {
+  final String hostname;
+  final List<String> remainingArgs;
+  ParseHostnameResults(this.hostname, this.remainingArgs);
 }
