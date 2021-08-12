@@ -21,28 +21,19 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
 import 'package:sse/server/sse_handler.dart';
 import 'package:test/test.dart';
-import 'package:webdriver/io.dart';
+import 'package:webdev_proxy/src/port_utils.dart';
 
 import 'package:webdev_proxy/src/webdev_proxy_server.dart';
 
+import 'chromedriver_utils.dart';
+
 void main() {
-  Process chromeDriver;
   WebdevProxyServer proxy;
   HttpServer server;
   SseHandler serverSse;
 
   setUpAll(() async {
-    try {
-      chromeDriver = await Process.start(
-          'chromedriver', ['--port=4444', '--url-base=wd/hub']);
-    } catch (e) {
-      throw StateError(
-          'Could not start ChromeDriver. Is it installed?\nError: $e');
-    }
-  });
-
-  tearDownAll(() {
-    chromeDriver.kill();
+    await startChromeDriver();
   });
 
   setUp(() async {
@@ -52,7 +43,8 @@ void main() {
     serverSse = SseHandler(Uri.parse(r'/$sseHandler'));
     final serverCascade =
         shelf.Cascade().add(serverSse.handler).add(staticWebHandler);
-    server = await shelf_io.serve(serverCascade.handler, 'localhost', 0);
+    server = await shelf_io.serve(
+        serverCascade.handler, 'localhost', await findUnusedPort());
   });
 
   tearDown(() async {
@@ -65,6 +57,7 @@ void main() {
       dir: 'test',
       hostname: 'localhost',
       portToProxy: server.port,
+      portToServe: await findUnusedPort(),
     );
 
     final response =
@@ -78,18 +71,11 @@ void main() {
       dir: 'test',
       hostname: 'localhost',
       portToProxy: server.port,
+      portToServe: await findUnusedPort(),
     );
 
-    final webdriver = await createDriver(desired: {
-      'chromeOptions': {
-        'args': ['--headless']
-      }
-    });
-    addTearDown(() async {
-      await webdriver.quit();
-    });
-
-    await webdriver.get('http://localhost:${proxy.port}');
+    final webDriver = await createWebDriver();
+    await webDriver.get('http://localhost:${proxy.port}');
     var connection = await serverSse.connections.next;
     connection.sink.add('blah');
     expect(await connection.stream.first, 'blah');

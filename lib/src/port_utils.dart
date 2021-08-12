@@ -14,11 +14,20 @@
 
 import 'dart:io';
 
-/// Returns a Future that completes with an open port that should be available
-/// for binding.
-Future<int> findAndReleaseOpenPort() async {
-  final socket = await ServerSocket.bind('localhost', 0);
-  final port = socket.port;
+/// Returns a port that is probably, but not definitely, not in use.
+///
+/// This has a built-in race condition: another process may bind this port at
+/// any time after this call has returned.
+Future<int> findUnusedPort() async {
+  int port;
+  ServerSocket socket;
+  try {
+    socket =
+        await ServerSocket.bind(InternetAddress.loopbackIPv6, 0, v6Only: true);
+  } on SocketException {
+    socket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+  }
+  port = socket.port;
   await socket.close();
   return port;
 }

@@ -20,9 +20,9 @@ import 'package:test/test.dart';
 import 'package:webdev_proxy/src/port_utils.dart';
 
 void main() {
-  group('findAndReleaseOpenPort()', () {
+  group('findUnusedPort()', () {
     test('should return an open port', () async {
-      final port = await findAndReleaseOpenPort();
+      final port = await findUnusedPort();
       ServerSocket socket;
       try {
         socket = await ServerSocket.bind('localhost', port);
@@ -34,8 +34,8 @@ void main() {
     });
 
     test('should return distinct ports when called multiple times', () async {
-      final port1 = await findAndReleaseOpenPort();
-      final port2 = await findAndReleaseOpenPort();
+      final port1 = await findUnusedPort();
+      final port2 = await findUnusedPort();
       expect(port1, isNot(port2), reason: 'Ports should be distinct.');
     });
   });
