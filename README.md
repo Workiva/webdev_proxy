@@ -6,7 +6,7 @@ index (`/`).
 
 The latest release of `webdev_proxy` requires the following:
 
-- Dart SDK `2.3` or later
+- Dart SDK `2.11` or later
 - `webdev` globally activated at a version in the `>=1.0.1 <3.0.0` range
   - Be sure to follow the [installation instructions for webdev][webdev-install]
 
