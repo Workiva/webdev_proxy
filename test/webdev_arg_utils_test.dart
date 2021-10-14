@@ -49,4 +49,42 @@ void main() {
           {'web/nested/dir/': 9000});
     });
   });
+
+  group('parseHostname', () {
+    test('with no args', () {
+      final result = parseHostname([]);
+      expect(result.hostname, 'localhost');
+      expect(result.remainingArgs, []);
+    });
+
+    test('with no hostname arg', () {
+      final result = parseHostname(['--release']);
+      expect(result.hostname, 'localhost');
+      expect(result.remainingArgs, ['--release']);
+    });
+
+    test('--hostname=<value>', () {
+      final result = parseHostname(['--hostname=0.0.0.0']);
+      expect(result.hostname, '0.0.0.0');
+      expect(result.remainingArgs, []);
+    });
+
+    test('--hostname=<value> with trailing args', () {
+      final result = parseHostname(['--hostname=0.0.0.0', '--release']);
+      expect(result.hostname, '0.0.0.0');
+      expect(result.remainingArgs, ['--release']);
+    });
+
+    test('--hostname value', () {
+      final result = parseHostname(['--hostname', '0.0.0.0']);
+      expect(result.hostname, '0.0.0.0');
+      expect(result.remainingArgs, []);
+    });
+
+    test('--hostname value with trailing args', () {
+      final result = parseHostname(['--hostname', '0.0.0.0', '--release']);
+      expect(result.hostname, '0.0.0.0');
+      expect(result.remainingArgs, ['--release']);
+    });
+  });
 }

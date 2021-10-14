@@ -33,7 +33,7 @@ void main() async {
   });
 
   test('Serves a directory', () async {
-    final port = await findAndReleaseOpenPort();
+    final port = await findUnusedPort();
     webdevServer = await WebdevServer.start(['test:$port']);
 
     // We don't have a good way of knowing when the `webdev serve` process has
@@ -42,7 +42,7 @@ void main() async {
     http.Response response;
     while (true) {
       try {
-        response = await http.get('http://localhost:${port}/web/index.dart');
+        response = await http.get('http://localhost:$port/web/index.dart');
       } catch (_) {
         await Future.delayed(Duration(milliseconds: 250));
         continue;

@@ -26,7 +26,7 @@ class WebdevProxy extends CommandRunner<int> {
   WebdevProxy()
       : super('webdev_proxy',
             'A simple dart proxy for `webdev serve` (uses the `shelf_proxy` package).') {
-    addCommand(new ServeCommand());
+    addCommand(ServeCommand());
     argParser.addFlag(verboseFlag, abbr: 'v', help: 'Enable verbose output.');
   }
 

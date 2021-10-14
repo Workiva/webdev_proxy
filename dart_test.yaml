@@ -1,3 +1,4 @@
 concurrency: 1
 reporter: expanded
 retry: 2
+timeout: 60s

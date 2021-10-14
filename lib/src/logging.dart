@@ -50,7 +50,7 @@ StringBuffer colorLog(LogRecord record, {bool verbose}) {
   }
 
   if (record.stackTrace != null && verbose) {
-    final trace = new Trace.from(record.stackTrace).terse;
+    final trace = Trace.from(record.stackTrace).terse;
     lines.add(trace);
   }
 
@@ -100,7 +100,7 @@ String humanReadable(Duration duration) {
 Future<T> logTimedAsync<T>(
   Logger logger,
   String description,
-  Future<T> action(), {
+  Future<T> Function() action, {
   Level level = Level.INFO,
 }) async {
   final watch = Stopwatch()..start();
@@ -118,7 +118,7 @@ Future<T> logTimedAsync<T>(
 T logTimedSync<T>(
   Logger logger,
   String description,
-  T action(), {
+  T Function() action, {
   Level level = Level.INFO,
 }) {
   final watch = Stopwatch()..start();
