@@ -1,3 +1,7 @@
+## 0.1.3
+
+- Dependency upgrades
+
 ## 0.1.2
 
 - Update the minimum Dart SDK version to 2.11.0
