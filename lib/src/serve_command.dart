@@ -34,11 +34,13 @@ import 'package:webdev_proxy/src/webdev_server.dart';
 /// Runs `webdev serve` behind a simple HTTP proxy.
 class ServeCommand extends Command<int> {
   static const rewrite404sFlag = 'rewrite-404s';
+  static const webPort = 'web-port';
 
   ServeCommand() {
     argParser.addFlag(rewrite404sFlag,
         defaultsTo: true,
         help: 'Rewrite every request that returns a 404 to /index.html');
+    argParser.addFlag('web-port', help: 'Specify port for serving web directory with webdev process');
   }
 
   @override
@@ -145,9 +147,12 @@ class ServeCommand extends Command<int> {
     // Each proxy will be mapped to a `webdev serve` instance on another port.
     final portsToServeByDir = parseDirectoryArgs(argResults.rest);
 
+    final webProxyPort = argResults[webPort];
+
+    throw Exception('foo');
     // Find open ports for each of the directories to be served by webdev.
     final portsToProxyByDir = {
-      for (final dir in portsToServeByDir.keys) dir: await findUnusedPort()
+      for (final dir in portsToServeByDir.keys) dir: webProxyPort
     };
 
     // Start the underlying `webdev serve` process.
