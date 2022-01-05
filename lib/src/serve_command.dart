@@ -149,7 +149,6 @@ class ServeCommand extends Command<int> {
 
     final webProxyPort = argResults[webPort];
 
-    throw Exception('foo');
     // Find open ports for each of the directories to be served by webdev.
     final portsToProxyByDir = {
       for (final dir in portsToServeByDir.keys) dir: webProxyPort
