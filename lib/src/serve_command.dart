@@ -40,7 +40,7 @@ class ServeCommand extends Command<int> {
     argParser.addFlag(rewrite404sFlag,
         defaultsTo: true,
         help: 'Rewrite every request that returns a 404 to /index.html');
-    argParser.addFlag('web-port', help: 'Specify port for serving web directory with webdev process');
+    argParser.addOption('web-port', help: 'Specify port for serving web directory with webdev process');
   }
 
   @override
@@ -151,7 +151,7 @@ class ServeCommand extends Command<int> {
 
     // Find open ports for each of the directories to be served by webdev.
     final portsToProxyByDir = {
-      for (final dir in portsToServeByDir.keys) dir: webProxyPort
+      for (final dir in portsToServeByDir.keys) dir: int.parse(webProxyPort)
     };
 
     // Start the underlying `webdev serve` process.
