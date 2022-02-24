@@ -36,3 +36,6 @@ dev_dependencies:
 
 executables:
   webdev_proxy:
+
+dependency_overrides:
+  http: ^0.13.0
