@@ -30,8 +30,8 @@ ProcessResult cachedWebdevVersionResult;
 /// activated, or `null` if it is not activated.
 Version getGlobalWebdevVersion() {
   cachedWebdevVersionResult ??= Process.runSync(
-    'pub',
-    ['global', 'run', 'webdev', '--version'],
+    'dart',
+    ['pub', 'global', 'run', 'webdev', '--version'],
     stdoutEncoding: utf8,
   );
   if (cachedWebdevVersionResult.exitCode != 0) {
@@ -53,8 +53,8 @@ Future<int> printWebdevServeHelp() async {
         '====================\n'),
   );
   final process = await Process.start(
-    'pub',
-    ['global', 'run', 'webdev', 'help', 'serve'],
+    'dart',
+    ['pub', 'global', 'run', 'webdev', 'help', 'serve'],
     mode: ProcessStartMode.inheritStdio,
   );
   return process.exitCode;

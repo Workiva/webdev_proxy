@@ -16,7 +16,7 @@ The latest release of `webdev_proxy` requires the following:
 installed as a package dependency.
 
 ```bash
-$ pub global activate webdev_proxy
+$ dart pub global activate webdev_proxy
 ```
 
 Learn more about activating and using packages [here][pub-global].
