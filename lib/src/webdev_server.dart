@@ -38,10 +38,10 @@ class WebdevServer {
   /// Starts a `webdev serve` process with the given [args] and returns a
   /// [WebdevServer] abstraction over said process.
   static Future<WebdevServer> start(List<String> args) async {
-    final webdevArgs = ['global', 'run', 'webdev', 'serve', ...args];
-    log.fine('Running `pub ${webdevArgs.join(' ')}');
+    final webdevArgs = ['pub', 'global', 'run', 'webdev', 'serve', ...args];
+    log.fine('Running `dart ${webdevArgs.join(' ')}');
     final process = await Process.start(
-      'pub',
+      'dart',
       webdevArgs,
       mode: ProcessStartMode.inheritStdio,
     );
