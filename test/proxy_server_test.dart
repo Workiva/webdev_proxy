@@ -61,7 +61,7 @@ void main() {
     );
 
     final response =
-        await http.get('http://localhost:${proxy.port}/index.dart');
+        await http.get(Uri.parse('http://localhost:${proxy.port}/index.dart'));
     expect(response.statusCode, 200);
     expect(response.body, isNotEmpty);
   });
@@ -90,7 +90,7 @@ void main() {
     );
 
     final response =
-        await http.get('http://localhost:${proxy.port}/path/to/nothing');
+        await http.get(Uri.parse('http://localhost:${proxy.port}/path/to/nothing'));
     expect(response.statusCode, 200);
     expect(response.body, startsWith('<!DOCTYPE html>'));
   });
@@ -104,7 +104,7 @@ void main() {
     );
 
     final response =
-        await http.get('http://localhost:${proxy.port}/path/to/nothing');
+        await http.get(Uri.parse('http://localhost:${proxy.port}/path/to/nothing'));
     expect(response.statusCode, 404);
   });
 }

@@ -42,7 +42,7 @@ void main() async {
     http.Response response;
     while (true) {
       try {
-        response = await http.get('http://localhost:$port/web/index.dart');
+        response = await http.get(Uri.parse('http://localhost:$port/web/index.dart'));
       } catch (_) {
         await Future.delayed(Duration(milliseconds: 250));
         continue;
