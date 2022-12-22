@@ -33,5 +33,5 @@ jobs:
         run: dart analyze
 
       - name: Tests
-        run: dart test
+        run: dart test --chain-stack-traces
         if: ${{ matrix.sdk == '2.13.4' }}
