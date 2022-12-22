@@ -1,3 +1,23 @@
+## 0.1.8
+
+- Dependency upgrades https://github.com/Workiva/webdev_proxy/pull/26
+
+## 0.1.7
+
+- #24 Use dart pub instead of just pub
+
+## 0.1.6
+
+- Dependency upgrades #20
+
+## 0.1.5
+
+- #19 Replace deprecated commands with new dart commands
+
+## 0.1.4
+
+- #17 Fix wildcard to include branch names with slashes
+
 ## 0.1.3
 
 - Dependency upgrades
