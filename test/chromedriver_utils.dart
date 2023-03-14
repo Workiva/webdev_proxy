@@ -50,7 +50,8 @@ Future<wd.WebDriver> createWebDriver() async {
   final webDriver = await wd.createDriver(
       spec: wd.WebDriverSpec.JsonWire,
       desired: capabilities,
-      uri: Uri.parse('http://localhost:$chromeDriverPort/$chromeDriverUrlBase/'));
+      uri: Uri.parse(
+          'http://localhost:$chromeDriverPort/$chromeDriverUrlBase/'));
   addTearDown(webDriver.quit);
   return webDriver;
 }
