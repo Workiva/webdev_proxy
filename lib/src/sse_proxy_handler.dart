@@ -61,7 +61,7 @@ class SseProxyHandler {
 
     req.hijack((channel) {
       final sink = utf8.encoder.startChunkedConversion(channel.sink)
-        ..add(_sseHeaders(req.headers['origin']!));
+        ..add(_sseHeaders(req.headers['origin'] ?? ''));
 
       StreamSubscription serverSseSub;
       StreamSubscription? reqChannelSub;
