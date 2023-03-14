@@ -172,7 +172,7 @@ class ServeCommand extends Command<int> {
           dir: dir,
           hostname: hostname,
           portToProxy: portsToProxyByDir[dir],
-          portToServe: portsToServeByDir[dir],
+          portToServe: portsToServeByDir[dir]!,
           rewrite404s: argResults![rewrite404sFlag] == true,
         ));
       } catch (e, stackTrace) {

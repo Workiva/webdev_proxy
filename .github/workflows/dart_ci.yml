@@ -15,10 +15,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sdk: [ stable, 2.13.4 ]
+        sdk: [ 2.18.7, stable, beta ]
     steps:
       - uses: actions/checkout@v2
-      - uses: dart-lang/setup-dart@v0.2
+      - uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ matrix.sdk }}
 
@@ -34,4 +34,3 @@ jobs:
 
       - name: Tests
         run: dart test --chain-stack-traces
-        if: ${{ matrix.sdk == '2.13.4' }}
