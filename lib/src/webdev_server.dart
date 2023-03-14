@@ -30,7 +30,7 @@ class WebdevServer {
 
   /// Permanently stops this proxy server from listening for new connections and
   /// closes all active connections immediately.
-  Future<Null> close() async {
+  Future<void> close() async {
     _process.kill();
     await _process.exitCode;
   }

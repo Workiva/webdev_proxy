@@ -24,20 +24,20 @@ import 'package:pub_semver/pub_semver.dart';
 final webdevCompatibility = VersionConstraint.parse('>=1.0.1 <3.0.0');
 
 @visibleForTesting
-ProcessResult cachedWebdevVersionResult;
+ProcessResult? cachedWebdevVersionResult;
 
 /// Returns the version of the `webdev` package that is currently globally
 /// activated, or `null` if it is not activated.
-Version getGlobalWebdevVersion() {
+Version? getGlobalWebdevVersion() {
   cachedWebdevVersionResult ??= Process.runSync(
     'dart',
     ['pub', 'global', 'run', 'webdev', '--version'],
     stdoutEncoding: utf8,
   );
-  if (cachedWebdevVersionResult.exitCode != 0) {
+  if (cachedWebdevVersionResult!.exitCode != 0) {
     return null;
   }
-  return Version.parse(cachedWebdevVersionResult.stdout.toString().trim());
+  return Version.parse(cachedWebdevVersionResult!.stdout.toString().trim());
 }
 
 /// Prints the output from `webdev help serve` with a header that explains how

@@ -22,7 +22,7 @@ import 'package:webdev_proxy/src/webdev_server.dart';
 import 'util.dart';
 
 void main() async {
-  WebdevServer webdevServer;
+  late WebdevServer? webdevServer;
 
   setUpAll(() async {
     await activateWebdev(webdevCompatibility.toString());
@@ -48,7 +48,7 @@ void main() async {
         await Future.delayed(Duration(milliseconds: 250));
         continue;
       }
-      if (response?.statusCode == 200) {
+      if (response.statusCode == 200) {
         break;
       }
     }

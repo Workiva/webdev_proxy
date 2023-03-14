@@ -16,7 +16,6 @@ import 'dart:io';
 
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:io/ansi.dart';
-import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_proxy/shelf_proxy.dart' as shelf_proxy;
@@ -37,7 +36,7 @@ class WebdevProxyServer {
 
   /// Permanently stops this proxy server from listening for new connections and
   /// closes all active connections immediately.
-  Future<Null> close() async {
+  Future<void> close() async {
     await _server.close(force: true);
   }
 
@@ -51,14 +50,12 @@ class WebdevProxyServer {
   /// request that fetches the root index path (`/`) unless [rewrite404s] is
   /// false.
   static Future<WebdevProxyServer> start({
-    @required String dir,
-    @required String hostname,
-    @required int portToProxy,
-    int portToServe,
-    bool rewrite404s,
+    required String dir,
+    required String hostname,
+    required int? portToProxy,
+    int portToServe = 0,
+    bool rewrite404s = true,
   }) async {
-    portToServe ??= 0;
-    rewrite404s ??= true;
 
     final serverHostname = hostname == 'any' ? 'localhost' : hostname;
     final serverUri = Uri.parse('http://$serverHostname:$portToProxy');
@@ -77,9 +74,7 @@ class WebdevProxyServer {
     final server = await HttpMultiServer.bind(hostname, portToServe);
     shelf_io.serveRequests(server, cascade.handler);
     final proxyHostname = hostname == 'any' ? '::' : hostname;
-    log.info(green.wrap('Serving `$dir` proxy on '
-            'http://$proxyHostname:$portToServe') +
-        '\n');
+    log.info(green.wrap('Serving `$dir` proxy on http://$proxyHostname:$portToServe\n'));
     log.fine('... forwards to http://$serverHostname:$portToProxy');
     return WebdevProxyServer._(server);
   }

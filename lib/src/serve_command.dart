@@ -18,7 +18,6 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:io/ansi.dart';
 import 'package:io/io.dart';
-import 'package:pedantic/pedantic.dart';
 
 import 'package:webdev_proxy/src/command_runner.dart';
 import 'package:webdev_proxy/src/command_utils.dart';
@@ -52,7 +51,7 @@ class ServeCommand extends Command<int> {
       '[-- [webdev serve arguments]]';
 
   @override
-  String get usageFooter => _webdevCompatibilityHelp;
+  String? get usageFooter => _webdevCompatibilityHelp;
 
   @override
   String get name => 'serve';
@@ -60,7 +59,7 @@ class ServeCommand extends Command<int> {
   bool get _canUseWebdev => !_missingWebdev && _hasCompatibleWebdev;
 
   bool get _hasCompatibleWebdev =>
-      webdevCompatibility.allows(getGlobalWebdevVersion());
+      webdevCompatibility.allows(getGlobalWebdevVersion()!);
 
   bool get _missingWebdev => getGlobalWebdevVersion() == null;
 
@@ -78,7 +77,7 @@ class ServeCommand extends Command<int> {
     }
   }
 
-  String get _webdevCompatibilityHelp {
+  String? get _webdevCompatibilityHelp {
     if (_missingWebdev) {
       return red.wrap(
         'This command requires that `webdev` be activated globally.\n'
@@ -109,19 +108,19 @@ class ServeCommand extends Command<int> {
     //
     // To enforce this, we validate that [argResults.rest] is exactly equal to
     // all the arguments after the `--`.
-    assertNoPositionalArgsBeforeSeparator(name, argResults, usageException);
+    assertNoPositionalArgsBeforeSeparator(name, argResults!, usageException);
 
     final exitCodeCompleter = Completer<int>();
     var interruptReceived = false;
     final proxies = <WebdevProxyServer>[];
     var proxiesFailed = false;
-    StreamSubscription sigintSub;
-    WebdevServer webdevServer;
+    StreamSubscription? sigintSub;
+    WebdevServer? webdevServer;
 
     void shutDown(int code) async {
       await Future.wait([
-        sigintSub?.cancel(),
-        webdevServer?.close(),
+        if (sigintSub != null) sigintSub.cancel(),
+        if (webdevServer != null) webdevServer.close(),
         ...proxies.map((proxy) => proxy.close()),
       ]);
       if (!exitCodeCompleter.isCompleted) {
@@ -137,13 +136,13 @@ class ServeCommand extends Command<int> {
     });
 
     // Parse the hostname to serve each dir on (defaults to 0.0.0.0)
-    final hostnameResults = parseHostname(argResults.rest);
+    final hostnameResults = parseHostname(argResults!.rest);
     final hostname = hostnameResults.hostname;
     final remainingArgs = hostnameResults.remainingArgs;
 
     // Parse the directory:port mappings that will be used by the proxy servers.
     // Each proxy will be mapped to a `webdev serve` instance on another port.
-    final portsToServeByDir = parseDirectoryArgs(argResults.rest);
+    final portsToServeByDir = parseDirectoryArgs(argResults!.rest);
 
     // Find open ports for each of the directories to be served by webdev.
     final portsToProxyByDir = {
@@ -174,7 +173,7 @@ class ServeCommand extends Command<int> {
           hostname: hostname,
           portToProxy: portsToProxyByDir[dir],
           portToServe: portsToServeByDir[dir],
-          rewrite404s: argResults[rewrite404sFlag] == true,
+          rewrite404s: argResults![rewrite404sFlag] == true,
         ));
       } catch (e, stackTrace) {
         proxiesFailed = true;

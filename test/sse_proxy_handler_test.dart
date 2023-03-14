@@ -15,10 +15,10 @@ import 'package:webdev_proxy/src/sse_proxy_handler.dart';
 import 'chromedriver_utils.dart';
 
 void main() {
-  HttpServer proxy;
-  HttpServer server;
-  SseHandler serverSse;
-  WebDriver webdriver;
+  late HttpServer proxy;
+  late HttpServer server;
+  late SseHandler serverSse;
+  late WebDriver webdriver;
 
   setUpAll(() async {
     await startChromeDriver();

@@ -23,7 +23,7 @@ void main() {
   group('findUnusedPort()', () {
     test('should return an open port', () async {
       final port = await findUnusedPort();
-      ServerSocket socket;
+      late ServerSocket socket;
       try {
         socket = await ServerSocket.bind('localhost', port);
       } catch (e) {
