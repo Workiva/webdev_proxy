@@ -27,7 +27,7 @@ jobs:
 
       - name: Formatting
         run: dart format --output=none --set-exit-if-changed .
-        if: always() && ${{ matrix.sdk }} == 'stable'
+        if: ${{ matrix.sdk }} == '2.18.7'
 
       - name: Analysis
         run: dart analyze
