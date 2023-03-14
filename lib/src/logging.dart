@@ -29,7 +29,6 @@ const _logSuffix = '\n';
 final Logger log = Logger('Proxy');
 
 StringBuffer colorLog(LogRecord record, {bool verbose = false}) {
-
   AnsiCode color;
   if (record.level < Level.WARNING) {
     color = cyan;

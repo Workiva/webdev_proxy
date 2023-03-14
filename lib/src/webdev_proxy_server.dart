@@ -56,7 +56,6 @@ class WebdevProxyServer {
     int portToServe = 0,
     bool rewrite404s = true,
   }) async {
-
     final serverHostname = hostname == 'any' ? 'localhost' : hostname;
     final serverUri = Uri.parse('http://$serverHostname:$portToProxy');
     final serverSseUri = serverUri.replace(path: r'/$sseHandler');
@@ -74,7 +73,8 @@ class WebdevProxyServer {
     final server = await HttpMultiServer.bind(hostname, portToServe);
     shelf_io.serveRequests(server, cascade.handler);
     final proxyHostname = hostname == 'any' ? '::' : hostname;
-    log.info(green.wrap('Serving `$dir` proxy on http://$proxyHostname:$portToServe\n'));
+    log.info(green
+        .wrap('Serving `$dir` proxy on http://$proxyHostname:$portToServe\n'));
     log.fine('... forwards to http://$serverHostname:$portToProxy');
     return WebdevProxyServer._(server);
   }
