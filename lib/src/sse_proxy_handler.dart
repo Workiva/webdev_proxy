@@ -39,8 +39,6 @@ class SseProxyHandler {
   final Uri _proxyUri;
   final Uri _serverUri;
 
-  
-
   /// Creates an SSE proxy handler that will handle EventSource requests to
   /// [proxyUri] by proxying them to [serverUri].
   SseProxyHandler(Uri proxyUri, Uri serverUri, {String? proxyName})
@@ -102,12 +100,11 @@ class SseProxyHandler {
   }
 
   Future<shelf.Response> _handleIncomingMessage(shelf.Request req) async {
-    _incomingMessageProxyHandler ??=
-      shelf_proxy.proxyHandler(
-    _serverUri,
-    client: _httpClient,
-    proxyName: _proxyName,
-  );
+    _incomingMessageProxyHandler ??= shelf_proxy.proxyHandler(
+      _serverUri,
+      client: _httpClient,
+      proxyName: _proxyName,
+    );
     return _incomingMessageProxyHandler!(req);
   }
 }
