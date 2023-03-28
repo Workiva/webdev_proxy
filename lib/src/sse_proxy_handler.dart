@@ -35,14 +35,16 @@ String _sseHeaders(String origin) => 'HTTP/1.1 200 OK\r\n'
 class SseProxyHandler {
   final _httpClient = http.Client();
   late final shelf.Handler _incomingMessageProxyHandler =
-      shelf_proxy.proxyHandler(
-    _serverUri,
-    client: _httpClient,
-    proxyName: _proxyName,
-  );
+      _constructProxyHandler();
   final String? _proxyName;
   final Uri _proxyUri;
   final Uri _serverUri;
+
+  shelf.Handler _constructProxyHandler() => shelf_proxy.proxyHandler(
+        _serverUri,
+        client: _httpClient,
+        proxyName: _proxyName,
+      );
 
   /// Creates an SSE proxy handler that will handle EventSource requests to
   /// [proxyUri] by proxying them to [serverUri].
