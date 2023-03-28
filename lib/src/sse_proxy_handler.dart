@@ -34,7 +34,12 @@ String _sseHeaders(String origin) => 'HTTP/1.1 200 OK\r\n'
 /// simply forwards data back and forth between clients and the actual server.
 class SseProxyHandler {
   final _httpClient = http.Client();
-  shelf.Handler? _incomingMessageProxyHandler;
+  late final shelf.Handler _incomingMessageProxyHandler =
+      shelf_proxy.proxyHandler(
+    _serverUri,
+    client: _httpClient,
+    proxyName: _proxyName,
+  );
   final String? _proxyName;
   final Uri _proxyUri;
   final Uri _serverUri;
@@ -100,11 +105,6 @@ class SseProxyHandler {
   }
 
   Future<shelf.Response> _handleIncomingMessage(shelf.Request req) async {
-    _incomingMessageProxyHandler ??= shelf_proxy.proxyHandler(
-      _serverUri,
-      client: _httpClient,
-      proxyName: _proxyName,
-    );
-    return _incomingMessageProxyHandler!(req);
+    return _incomingMessageProxyHandler(req);
   }
 }

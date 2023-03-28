@@ -43,7 +43,7 @@ class WebdevServer {
     final process = await Process.start(
       'dart',
       webdevArgs,
-      mode: ProcessStartMode.inheritStdio,
+      // mode: ProcessStartMode.inheritStdio,
     );
     return WebdevServer._(process);
   }

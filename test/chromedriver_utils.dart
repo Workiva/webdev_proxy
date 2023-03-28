@@ -12,7 +12,18 @@ Future<void> startChromeDriver() async {
   try {
     final chromeDriver = await Process.start(
         'chromedriver', ['--port=4444', '--url-base=wd/hub']);
-    addTearDown(chromeDriver.kill);
+    addTearDown(() {
+      if (!chromeDriver.kill()) {
+        print('COULD NOT KILL CHROMEDRIVER with sigterm');
+        if (!chromeDriver.kill(ProcessSignal.sigkill)) {
+          print('COULD NOT KILL CHROMEDRIVER with sigkill');
+        } else {
+          print('sigkill chromedriver');
+        }
+      } else {
+        print('sigterm chromedriver');
+      }
+    });
 
     // On windows this takes a while to boot up, wait for the first line
     // of stdout as a signal that it is ready.
