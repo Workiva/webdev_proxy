@@ -54,10 +54,14 @@ void main() {
 
   test('Can round trip messages', () async {
     await webdriver.get('http://localhost:${proxy.port}');
+    
+    // Give webdriver more time to get its act together?
+    await Future.delayed(Duration(seconds: 3));
+
     var connection = await serverSse.connections.next;
     connection.sink.add('blah');
     expect(await connection.stream.first, 'blah');
-  }, skip: true);
+  });
 
   test('Multiple clients can connect', () async {
     var connections = serverSse.connections;
