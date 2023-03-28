@@ -53,7 +53,7 @@ void main() {
   });
 
   test('Can round trip messages', () async {
-    await webdriver.get('http://localhost:${proxy.port}');
+    await webdriver.get('http://127.0.0.1:${proxy.port}');
     var connection = await serverSse.connections.next;
     connection.sink.add('blah');
     expect(await connection.stream.first, 'blah');
