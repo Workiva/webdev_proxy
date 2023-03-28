@@ -54,7 +54,7 @@ void main() {
 
   test('Can round trip messages', () async {
     await webdriver.get('http://localhost:${proxy.port}');
-    
+
     // Give webdriver more time to get its act together?
     await Future.delayed(Duration(seconds: 3));
 
