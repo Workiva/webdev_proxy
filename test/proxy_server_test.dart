@@ -44,7 +44,7 @@ void main() {
     final serverCascade =
         shelf.Cascade().add(serverSse.handler).add(staticWebHandler);
     server = await shelf_io.serve(
-        serverCascade.handler, '127.0.0.1', await findUnusedPort());
+        serverCascade.handler, 'localhost', await findUnusedPort());
   });
 
   tearDown(() async {
@@ -55,13 +55,13 @@ void main() {
   test('Proxies URL that exists', () async {
     proxy = await WebdevProxyServer.start(
       dir: 'test',
-      hostname: '127.0.0.1',
+      hostname: 'localhost',
       portToProxy: server.port,
       portToServe: await findUnusedPort(),
     );
 
     final response =
-        await http.get(Uri.parse('http://127.0.0.1:${proxy.port}/index.dart'));
+        await http.get(Uri.parse('http://localhost:${proxy.port}/index.dart'));
     expect(response.statusCode, 200);
     expect(response.body, isNotEmpty);
   });
@@ -69,13 +69,13 @@ void main() {
   test('Proxies the /\$sseHandler endpoint', () async {
     proxy = await WebdevProxyServer.start(
       dir: 'test',
-      hostname: '127.0.0.1',
+      hostname: 'localhost',
       portToProxy: server.port,
       portToServe: await findUnusedPort(),
     );
 
     final webDriver = await createWebDriver();
-    await webDriver.get('http://127.0.0.1:${proxy.port}');
+    await webDriver.get('http://localhost:${proxy.port}');
     var connection = await serverSse.connections.next;
     connection.sink.add('blah');
     expect(await connection.stream.first, 'blah');
@@ -84,13 +84,13 @@ void main() {
   test('Rewrites 404s to /index.html when enabled', () async {
     proxy = await WebdevProxyServer.start(
       dir: 'test',
-      hostname: '127.0.0.1',
+      hostname: 'localhost',
       portToProxy: server.port,
       rewrite404s: true,
     );
 
     final response = await http
-        .get(Uri.parse('http://127.0.0.1:${proxy.port}/path/to/nothing'));
+        .get(Uri.parse('http://localhost:${proxy.port}/path/to/nothing'));
     expect(response.statusCode, 200);
     expect(response.body, startsWith('<!DOCTYPE html>'));
   });
@@ -98,13 +98,13 @@ void main() {
   test('Does not rewrite 404s to /index.html when disabled', () async {
     proxy = await WebdevProxyServer.start(
       dir: 'test',
-      hostname: '127.0.0.1',
+      hostname: 'localhost',
       portToProxy: server.port,
       rewrite404s: false,
     );
 
     final response = await http
-        .get(Uri.parse('http://127.0.0.1:${proxy.port}/path/to/nothing'));
+        .get(Uri.parse('http://localhost:${proxy.port}/path/to/nothing'));
     expect(response.statusCode, 404);
   });
 }
