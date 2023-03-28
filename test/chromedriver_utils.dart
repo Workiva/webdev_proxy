@@ -51,7 +51,7 @@ Future<wd.WebDriver> createWebDriver() async {
       spec: wd.WebDriverSpec.JsonWire,
       desired: capabilities,
       uri: Uri.parse(
-          'http://localhost:$chromeDriverPort/$chromeDriverUrlBase/'));
+          'http://127.0.0.1:$chromeDriverPort/$chromeDriverUrlBase/'));
   addTearDown(webDriver.quit);
   return webDriver;
 }
