@@ -1,3 +1,7 @@
+## 0.1.9
+
+- Updated to null safety. Dart SDK minimum of 2.12.
+
 ## 0.1.8
 
 - Dependency upgrades https://github.com/Workiva/webdev_proxy/pull/26
