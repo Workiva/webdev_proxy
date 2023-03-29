@@ -15,10 +15,10 @@ import 'package:webdev_proxy/src/sse_proxy_handler.dart';
 import 'chromedriver_utils.dart';
 
 void main() {
-  HttpServer proxy;
-  HttpServer server;
-  SseHandler serverSse;
-  WebDriver webdriver;
+  late HttpServer proxy;
+  late HttpServer server;
+  late SseHandler serverSse;
+  late WebDriver webdriver;
 
   setUpAll(() async {
     await startChromeDriver();
@@ -54,6 +54,10 @@ void main() {
 
   test('Can round trip messages', () async {
     await webdriver.get('http://localhost:${proxy.port}');
+
+    // Give webdriver more time to get its act together?
+    await Future.delayed(Duration(seconds: 3));
+
     var connection = await serverSse.connections.next;
     connection.sink.add('blah');
     expect(await connection.stream.first, 'blah');

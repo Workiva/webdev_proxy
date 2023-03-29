@@ -28,9 +28,7 @@ const _logSuffix = '\n';
 
 final Logger log = Logger('Proxy');
 
-StringBuffer colorLog(LogRecord record, {bool verbose}) {
-  verbose ??= false;
-
+StringBuffer colorLog(LogRecord record, {bool verbose = false}) {
   AnsiCode color;
   if (record.level < Level.WARNING) {
     color = cyan;
@@ -44,13 +42,13 @@ StringBuffer colorLog(LogRecord record, {bool verbose}) {
   final lines = <Object>[
     '$eraseLine$level ${_loggerName(record, verbose)}${record.message}'
   ];
-
-  if (record.error != null) {
-    lines.add(record.error);
+  var error = record.error;
+  if (error != null) {
+    lines.add(error);
   }
 
   if (record.stackTrace != null && verbose) {
-    final trace = Trace.from(record.stackTrace).terse;
+    final trace = Trace.from(record.stackTrace!).terse;
     lines.add(trace);
   }
 
@@ -130,7 +128,7 @@ T logTimedSync<T>(
   return result;
 }
 
-Function(LogRecord) stdIOLogListener({bool verbose}) =>
+Function(LogRecord) stdIOLogListener({bool verbose = false}) =>
     (record) => io.stdout.write(colorLog(record, verbose: verbose));
 
 String _loggerName(LogRecord record, bool verbose) {

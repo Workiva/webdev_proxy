@@ -21,7 +21,7 @@ import 'package:webdev_proxy/src/command_utils.dart';
 void main() {
   group('assertNoPositionalArgsBeforeSeparator', () {
     final argParser = ArgParser()..addCommand('command');
-    String capturedUsageException;
+    String? capturedUsageException;
     void usageException(String msg) => capturedUsageException = msg;
 
     tearDown(() {
@@ -32,7 +32,7 @@ void main() {
       test('if rest args are empty', () {
         final argResults = argParser.parse(['command']);
         assertNoPositionalArgsBeforeSeparator(
-            'serve', argResults.command, usageException);
+            'serve', argResults.command!, usageException);
         expect(capturedUsageException, isNull);
       });
 
@@ -40,14 +40,14 @@ void main() {
         argParser.addFlag('flag');
         final argResults = argParser.parse(['command', '--flag']);
         assertNoPositionalArgsBeforeSeparator(
-            'serve', argResults.command, usageException);
+            'serve', argResults.command!, usageException);
         expect(capturedUsageException, isNull);
       });
 
       test('if args are only passed after -- separator', () {
         final argResults = argParser.parse(['command', '--', 'after']);
         assertNoPositionalArgsBeforeSeparator(
-            'serve', argResults.command, usageException);
+            'serve', argResults.command!, usageException);
         expect(capturedUsageException, isNull);
       });
     });
@@ -56,7 +56,7 @@ void main() {
       test('-- separator is missing before webdev args', () {
         final argResults = argParser.parse(['command', 'foo']);
         assertNoPositionalArgsBeforeSeparator(
-            'serve', argResults.command, usageException);
+            'serve', argResults.command!, usageException);
         expect(capturedUsageException, isNotNull);
       });
 
@@ -64,7 +64,7 @@ void main() {
         final argResults =
             argParser.parse(['command', 'before', '--', 'after']);
         assertNoPositionalArgsBeforeSeparator(
-            'serve', argResults.command, usageException);
+            'serve', argResults.command!, usageException);
         expect(capturedUsageException, isNotNull);
       });
     });

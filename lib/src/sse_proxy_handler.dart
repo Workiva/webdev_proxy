@@ -34,14 +34,19 @@ String _sseHeaders(String origin) => 'HTTP/1.1 200 OK\r\n'
 /// simply forwards data back and forth between clients and the actual server.
 class SseProxyHandler {
   final _httpClient = http.Client();
-  shelf.Handler _incomingMessageProxyHandler;
-  final String _proxyName;
+  late final shelf.Handler _incomingMessageProxyHandler =
+      shelf_proxy.proxyHandler(
+    _serverUri,
+    client: _httpClient,
+    proxyName: _proxyName,
+  );
+  final String? _proxyName;
   final Uri _proxyUri;
   final Uri _serverUri;
 
   /// Creates an SSE proxy handler that will handle EventSource requests to
   /// [proxyUri] by proxying them to [serverUri].
-  SseProxyHandler(Uri proxyUri, Uri serverUri, {String proxyName})
+  SseProxyHandler(Uri proxyUri, Uri serverUri, {String? proxyName})
       : _proxyUri = proxyUri,
         _serverUri = serverUri,
         _proxyName = proxyName;
@@ -61,10 +66,10 @@ class SseProxyHandler {
 
     req.hijack((channel) {
       final sink = utf8.encoder.startChunkedConversion(channel.sink)
-        ..add(_sseHeaders(req.headers['origin']));
+        ..add(_sseHeaders(req.headers['origin'] ?? ''));
 
       StreamSubscription serverSseSub;
-      StreamSubscription reqChannelSub;
+      StreamSubscription? reqChannelSub;
 
       serverSseSub =
           utf8.decoder.bind(serverResponse.stream).listen(sink.add, onDone: () {
@@ -75,7 +80,7 @@ class SseProxyHandler {
       reqChannelSub = channel.stream.listen((_) {
         // SSE is unidirectional.
       }, onDone: () {
-        serverSseSub?.cancel();
+        serverSseSub.cancel();
         sink.close();
       });
     });
@@ -100,11 +105,6 @@ class SseProxyHandler {
   }
 
   Future<shelf.Response> _handleIncomingMessage(shelf.Request req) async {
-    _incomingMessageProxyHandler ??= shelf_proxy.proxyHandler(
-      _serverUri,
-      client: _httpClient,
-      proxyName: _proxyName,
-    );
     return _incomingMessageProxyHandler(req);
   }
 }

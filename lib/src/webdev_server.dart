@@ -30,20 +30,21 @@ class WebdevServer {
 
   /// Permanently stops this proxy server from listening for new connections and
   /// closes all active connections immediately.
-  Future<Null> close() async {
+  Future<void> close() async {
     _process.kill();
     await _process.exitCode;
   }
 
   /// Starts a `webdev serve` process with the given [args] and returns a
   /// [WebdevServer] abstraction over said process.
-  static Future<WebdevServer> start(List<String> args) async {
+  static Future<WebdevServer> start(List<String> args,
+      {ProcessStartMode mode = ProcessStartMode.inheritStdio}) async {
     final webdevArgs = ['pub', 'global', 'run', 'webdev', 'serve', ...args];
     log.fine('Running `dart ${webdevArgs.join(' ')}');
     final process = await Process.start(
       'dart',
       webdevArgs,
-      mode: ProcessStartMode.inheritStdio,
+      mode: mode,
     );
     return WebdevServer._(process);
   }

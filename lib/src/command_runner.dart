@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+import 'dart:async';
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
@@ -33,11 +33,11 @@ class WebdevProxy extends CommandRunner<int> {
   @override
   Future<int> run(Iterable<String> args) async {
     // The help command returns null, so return success code in that case.
-    return await super.run(args) ?? 0;
+    return (await super.run(args)) ?? 0;
   }
 
   @override
-  Future<int> runCommand(ArgResults topLevelResults) async {
+  Future<int?> runCommand(ArgResults topLevelResults) async {
     final verbose = topLevelResults[verboseFlag] == true;
     Logger.root.level = verbose ? Level.ALL : Level.INFO;
     Logger.root.onRecord.listen(stdIOLogListener(verbose: verbose));

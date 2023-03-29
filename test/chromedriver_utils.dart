@@ -12,7 +12,11 @@ Future<void> startChromeDriver() async {
   try {
     final chromeDriver = await Process.start(
         'chromedriver', ['--port=4444', '--url-base=wd/hub']);
-    addTearDown(chromeDriver.kill);
+    addTearDown(() {
+      if (!chromeDriver.kill()) {
+        chromeDriver.kill(ProcessSignal.sigkill);
+      }
+    });
 
     // On windows this takes a while to boot up, wait for the first line
     // of stdout as a signal that it is ready.
@@ -51,7 +55,7 @@ Future<wd.WebDriver> createWebDriver() async {
       spec: wd.WebDriverSpec.JsonWire,
       desired: capabilities,
       uri: Uri.parse(
-          'http://127.0.0.1:$chromeDriverPort/$chromeDriverUrlBase/'));
+          'http://localhost:$chromeDriverPort/$chromeDriverUrlBase/'));
   addTearDown(webDriver.quit);
   return webDriver;
 }

@@ -15,10 +15,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sdk: [ stable, 2.13.4 ]
+        sdk: [ 2.18.7, stable ]
     steps:
       - uses: actions/checkout@v2
-      - uses: dart-lang/setup-dart@v0.2
+      - uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ matrix.sdk }}
 
@@ -27,11 +27,10 @@ jobs:
 
       - name: Formatting
         run: dart format --output=none --set-exit-if-changed .
-        if: always() && ${{ matrix.sdk }} == 'stable'
+        if: ${{ matrix.sdk }} == '2.18.7'
 
       - name: Analysis
         run: dart analyze
 
       - name: Tests
         run: dart test --chain-stack-traces
-        if: ${{ matrix.sdk == '2.13.4' }}
