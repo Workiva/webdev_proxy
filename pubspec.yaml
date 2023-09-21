@@ -31,7 +31,7 @@ dev_dependencies:
 
   shelf_static: ^1.1.0
   sse: ^4.1.0
-  test: ^1.17.12
+  test: ^1.21.1
   webdriver: ^3.0.0
 
 executables:
