@@ -18,8 +18,8 @@ Future<void> startChromeDriver() async {
       }
     });
 
-    // On windows this takes a while to boot up, wait for the first line
-    // of stdout as a signal that it is ready.
+    // On windows this takes a while to boot up, wait for a message on stdout
+    // indicating ChromeDriver started successfully.
     final stdOutLines = chromeDriver.stdout
         .transform(utf8.decoder)
         .transform(LineSplitter())
@@ -33,7 +33,8 @@ Future<void> startChromeDriver() async {
     stdOutLines.listen((line) => print('ChromeDriver stdout: $line'));
     stdErrLines.listen((line) => print('ChromeDriver stderr: $line'));
 
-    await stdOutLines.first;
+    await stdOutLines.firstWhere(
+        (line) => line.contains('ChromeDriver was started successfully'));
   } catch (e) {
     throw StateError(
         'Could not start ChromeDriver. Is it installed?\nError: $e');
