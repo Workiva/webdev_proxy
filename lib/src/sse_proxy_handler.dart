@@ -84,7 +84,6 @@ class SseProxyHandler {
         sink.close();
       });
     });
-    return shelf.Response.notFound('');
   }
 
   Future<shelf.Response> _handle(shelf.Request req) async {
