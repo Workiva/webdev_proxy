@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:test/test.dart';
 import 'package:webdev_proxy/src/port_utils.dart';
-import 'package:webdriver/io.dart' as wd;
+import 'package:webdriver/async_io.dart' as wd;
 
 const chromeDriverPort = 4444;
 const chromeDriverUrlBase = 'wd/hub';

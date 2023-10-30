@@ -8,7 +8,7 @@ import 'package:shelf_static/shelf_static.dart';
 import 'package:sse/server/sse_handler.dart';
 import 'package:test/test.dart';
 import 'package:webdev_proxy/src/port_utils.dart';
-import 'package:webdriver/io.dart';
+import 'package:webdriver/async_io.dart';
 
 import 'package:webdev_proxy/src/sse_proxy_handler.dart';
 
