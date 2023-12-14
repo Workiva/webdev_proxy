@@ -1,3 +1,12 @@
+## 0.1.11
+
+- Update webdev installation message to use `dart pub global activate` rather
+than `pub global activate`.
+
+## 0.1.10
+
+- Use Dart 2.19.6 in CI
+
 ## 0.1.9
 
 - Updated to null safety. Dart SDK minimum of 2.12.
