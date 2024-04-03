@@ -5,9 +5,12 @@ on:
     branches:
       - 'master'
       - 'test_consume_*'
+    tags:
+      - '**'
   pull_request:
     branches:
       - '**'
+
 
 jobs:
   build:
@@ -34,3 +37,9 @@ jobs:
 
       - name: Tests
         run: dart test --chain-stack-traces
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: ./
+          format: cyclonedx-json
