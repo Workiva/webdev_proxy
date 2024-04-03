@@ -43,3 +43,4 @@ jobs:
         with:
           path: ./
           format: cyclonedx-json
+
