@@ -13,7 +13,7 @@ jobs:
     uses: Workiva/gha-dart-oss/.github/workflows/build.yaml@v0.1.4
 
   checks:
-    uses: Workiva/gha-dart-oss/.github/workflows/checks.yaml@v0.1.4
+    uses: Workiva/gha-dart-oss/.github/workflows/checks.yaml@pub_get_analyze
 
   test-unit:
     strategy:
