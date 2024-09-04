@@ -12,13 +12,11 @@ environment:
 
 dependencies:
   args: ^2.3.1
-  glob: ^2.0.1
   http: ^0.13.3
   http_multi_server: ^3.2.1
   io: ^1.0.3
   logging: ^1.1.0
   meta: ^1.8.0
-  lints: ^2.0.1
   pub_semver: ^2.1.2
   shelf: ^1.2.0
   shelf_proxy: ^1.0.0
@@ -28,6 +26,7 @@ dev_dependencies:
   # These two build deps are required by webdev.
   build_runner: ^2.1.2
   build_web_compilers: ^3.0.0
+  lints: ^2.0.1
 
   shelf_static: ^1.1.0
   sse: ^4.1.0
