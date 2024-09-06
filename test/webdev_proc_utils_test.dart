@@ -36,7 +36,7 @@ void main() {
     });
 
     test('with webdev activated', () async {
-      await activateWebdev('2.0.0');
+      await activateWebdev('>=2.0.0 <4.0.0');
       expect(getGlobalWebdevVersion(), Version.parse('2.0.0'));
     });
   });
