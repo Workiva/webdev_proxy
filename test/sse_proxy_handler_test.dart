@@ -130,6 +130,8 @@ void main() {
     expect(serverSse.numberOfClients, 1);
 
     await webdriver.get('chrome://version/');
+    await Future.delayed(Duration(seconds: 1));
+
     expect(serverSse.numberOfClients, 0);
   });
 }
