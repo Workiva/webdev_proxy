@@ -129,9 +129,7 @@ void main() {
     await serverSse.connections.next;
     expect(serverSse.numberOfClients, 1);
 
-    await webdriver.get('chrome://version/');
-    await Future.delayed(Duration(seconds: 1));
-
+    await webdriver.get('about:blank');
     expect(serverSse.numberOfClients, 0);
   });
 }
