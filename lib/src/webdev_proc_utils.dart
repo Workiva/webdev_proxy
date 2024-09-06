@@ -21,7 +21,7 @@ import 'package:pub_semver/pub_semver.dart';
 
 /// The range of `webdev` versions with which this `webdev_proxy` package is
 /// compatible.
-final webdevCompatibility = VersionConstraint.parse('>=1.0.1 <3.0.0');
+final webdevCompatibility = VersionConstraint.parse('>=1.0.1 <4.0.0');
 
 @visibleForTesting
 ProcessResult? cachedWebdevVersionResult;
