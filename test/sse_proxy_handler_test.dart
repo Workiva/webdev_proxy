@@ -128,8 +128,7 @@ void main() {
     await webdriver.get('http://localhost:${proxy.port}');
     await serverSse.connections.next;
     expect(serverSse.numberOfClients, 1);
-
-    await webdriver.get('about:blank');
+    await webdriver.quit();
     expect(serverSse.numberOfClients, 0);
   });
 }
