@@ -37,19 +37,15 @@ void main() {
       expect(getGlobalWebdevVersion(), isNull);
     });
 
-    test('with webdev activated (dart 2)', () async {
-      print(Platform.version);
+    test('with webdev activated', () async {
       if (Platform.version.contains('2.19')) {
         await activateWebdev('2.0.0');
         expect(getGlobalWebdevVersion(), Version.parse('2.0.0'));
-      }
-    });
-
-    test('with webdev activated (dart 3)', () async {
-      print(Platform.version);
-      if (Platform.version.contains('3.')) {
+      } else if (Platform.version.contains('3.')) {
         await activateWebdev('3.0.0');
         expect(getGlobalWebdevVersion(), Version.parse('3.0.0'));
+      } else {
+        throw Exception('Unsupported Dart version: ${Platform.version}');
       }
     });
   });
