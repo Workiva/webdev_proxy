@@ -13,6 +13,8 @@
 // limitations under the License.
 
 @TestOn('vm')
+import 'dart:io';
+
 import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart';
 
@@ -36,8 +38,15 @@ void main() {
     });
 
     test('with webdev activated', () async {
-      await activateWebdev('2.0.0');
-      expect(getGlobalWebdevVersion(), Version.parse('2.0.0'));
+      if (Platform.version.contains('2.19')) {
+        await activateWebdev('2.0.0');
+        expect(getGlobalWebdevVersion(), Version.parse('2.0.0'));
+      } else if (Platform.version.contains('3.')) {
+        await activateWebdev('3.0.0');
+        expect(getGlobalWebdevVersion(), Version.parse('3.0.0'));
+      } else {
+        throw Exception('Unsupported Dart version: ${Platform.version}');
+      }
     });
   });
 
