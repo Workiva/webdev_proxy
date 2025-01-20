@@ -135,7 +135,7 @@ class ServeCommand extends Command<int> {
       shutDown(ExitCode.success.code);
     });
 
-    // Parse the hostname to serve each dir on (defaults to 0.0.0.0)
+    // Parse the hostname to serve each dir on (defaults to localhost).
     final hostnameResults = parseHostname(argResults!.rest);
     final hostname = hostnameResults.hostname;
     final remainingArgs = hostnameResults.remainingArgs;
