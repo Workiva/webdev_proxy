@@ -32,6 +32,7 @@ dev_dependencies:
   sse: ^4.1.0
   test: ^1.17.12
   webdriver: ^3.0.0
+  workiva_analysis_options: ^1.4.1
 
 executables:
   webdev_proxy:
