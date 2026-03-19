@@ -25,8 +25,10 @@ final _dirPattern = RegExp(
 
 class ParsedDirectoryPorts {
   final String directory;
+  final int? proxyPort;
   final int servePort;
-  ParsedDirectoryPorts({required this.directory, required this.servePort});
+  ParsedDirectoryPorts(
+      {required this.directory, this.proxyPort, required this.servePort});
 }
 
 /// Returns a mapping of directories to ports parsed from command-line [args] in
@@ -43,12 +45,18 @@ ParseDirectoryArgsResults parseDirectoryArgs(List<String> args) {
       remainingArgs.add(arg);
     } else {
       final splitOption = arg.split(':');
-      if (splitOption.length == 2) {
+      if (splitOption.length == 3) {
+        ports.add(ParsedDirectoryPorts(
+            directory: splitOption[0],
+            proxyPort: int.parse(splitOption[1]),
+            servePort: int.parse(splitOption[2])));
+      } else if (splitOption.length == 2) {
         ports.add(ParsedDirectoryPorts(
             directory: splitOption.first,
             servePort: int.parse(splitOption.last)));
       } else {
-        ports.add(ParsedDirectoryPorts(directory: arg, servePort: basePort++));
+        ports
+            .add(ParsedDirectoryPorts(directory: arg, servePort: basePort++));
       }
     }
   }

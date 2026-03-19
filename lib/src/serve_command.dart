@@ -147,7 +147,7 @@ class ServeCommand extends Command<int> {
     final dirPorts = await Future.wait(dirResults.ports
         .map((dirPort) async => DirectoryPorts(
             directory: dirPort.directory,
-            proxyPort: await findUnusedPort(),
+            proxyPort: dirPort.proxyPort ?? await findUnusedPort(),
             servePort: dirPort.servePort))
         .toList());
 
