@@ -138,24 +138,27 @@ class ServeCommand extends Command<int> {
     // Parse the hostname to serve each dir on (defaults to localhost).
     final hostnameResults = parseHostname(argResults!.rest);
     final hostname = hostnameResults.hostname;
-    final remainingArgs = hostnameResults.remainingArgs;
 
     // Parse the directory:port mappings that will be used by the proxy servers.
     // Each proxy will be mapped to a `webdev serve` instance on another port.
-    final portsToServeByDir = parseDirectoryArgs(argResults!.rest);
+    final dirResults = parseDirectoryArgs(hostnameResults.remainingArgs);
 
     // Find open ports for each of the directories to be served by webdev.
-    final portsToProxyByDir = {
-      for (final dir in portsToServeByDir.keys) dir: await findUnusedPort()
-    };
+    final dirPorts = await Future.wait(dirResults.ports
+        .map((dirPort) async => DirectoryPorts(
+            directory: dirPort.directory,
+            proxyPort: await findUnusedPort(),
+            servePort: dirPort.servePort))
+        .toList());
+
+    final webdevArgs = [
+      if (hostname != 'localhost') '--hostname=$hostname',
+      ...dirResults.remainingArgs,
+      for (final dir in dirPorts) '${dir.directory}:${dir.proxyPort}',
+    ];
 
     // Start the underlying `webdev serve` process.
-    webdevServer = await WebdevServer.start([
-      if (hostname != 'localhost') '--hostname=$hostname',
-      ...remainingArgs,
-      for (final dir in portsToServeByDir.keys)
-        '$dir:${portsToProxyByDir[dir]}',
-    ]);
+    webdevServer = await WebdevServer.start(webdevArgs);
 
     // Stop proxies and exit if webdev exits.
     unawaited(webdevServer.exitCode.then((code) {
@@ -166,21 +169,19 @@ class ServeCommand extends Command<int> {
     }));
 
     // Start a proxy server for each directory.
-    for (final dir in portsToServeByDir.keys) {
+    for (final dirPort in dirPorts) {
       try {
         proxies.add(await WebdevProxyServer.start(
-          dir: dir,
+          dir: dirPort.directory,
           hostname: hostname,
-          portToProxy: portsToProxyByDir[dir],
-          portToServe: portsToServeByDir[dir]!,
+          portToProxy: dirPort.proxyPort,
+          portToServe: dirPort.servePort,
           rewrite404s: argResults![rewrite404sFlag] == true,
         ));
       } catch (e, stackTrace) {
         proxiesFailed = true;
-        log.severe(
-            'Failed to start proxy server on port ${portsToServeByDir[dir]}',
-            e,
-            stackTrace);
+        log.severe('Failed to start proxy server on port ${dirPort.servePort}',
+            e, stackTrace);
         shutDown(ExitCode.unavailable.code);
         break;
       }
@@ -188,4 +189,14 @@ class ServeCommand extends Command<int> {
 
     return exitCodeCompleter.future;
   }
+}
+
+class DirectoryPorts {
+  final String directory;
+  final int proxyPort;
+  final int servePort;
+  DirectoryPorts(
+      {required this.directory,
+      required this.proxyPort,
+      required this.servePort});
 }
