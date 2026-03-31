@@ -16,6 +16,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:http/http.dart' as http;
 import 'package:io/ansi.dart';
 import 'package:io/io.dart';
 
@@ -149,6 +150,8 @@ class ServeCommand extends Command<int> {
       for (final dir in portsToServeByDir.keys) dir: await findUnusedPort()
     };
 
+    final startupTimer = Stopwatch()..start();
+
     // Start the underlying `webdev serve` process.
     webdevServer = await WebdevServer.start([
       if (hostname != 'localhost') '--hostname=$hostname',
@@ -186,6 +189,69 @@ class ServeCommand extends Command<int> {
       }
     }
 
+    if (!proxiesFailed) {
+      final hostToProbe = hostname == 'any' ? 'localhost' : hostname;
+      final readyByDir = {
+        for (final dir in portsToServeByDir.keys) dir: Completer<void>()
+      };
+
+      for (final dir in portsToServeByDir.keys) {
+        unawaited(() async {
+          try {
+            await _waitForProxyToServe(
+              host: hostToProbe,
+              port: portsToServeByDir[dir]!,
+            );
+            if (!readyByDir[dir]!.isCompleted) {
+              readyByDir[dir]!.complete();
+            }
+          } catch (e, stackTrace) {
+            if (!readyByDir[dir]!.isCompleted) {
+              readyByDir[dir]!.completeError(e, stackTrace);
+            }
+          }
+        }());
+      }
+      // to reduce exception noise, wait a few seconds
+      await Future.delayed(const Duration(seconds: 3));
+      
+      await Future.any([
+        Future.wait(readyByDir.values.map((completer) => completer.future)),
+        exitCodeCompleter.future,
+      ]);
+
+      if (!exitCodeCompleter.isCompleted) {
+        final elapsedSeconds =
+            (startupTimer.elapsedMilliseconds / 1000).toStringAsFixed(1);
+        stdout.writeln('[INFO] Succeeded after $elapsedSeconds seconds');
+        startupTimer.stop();
+      }
+    }
+
     return exitCodeCompleter.future;
+  }
+
+  static Future<void> _waitForProxyToServe({
+    required String host,
+    required int port,
+  }) async {
+    const pollInterval = Duration(milliseconds: 1000);
+
+    while (true) {
+      final uri = Uri.parse('http://$host:$port');
+      try {
+        stdout.writeln('[INFO] Pinging server $uri to detect responsiveness...an exception from the server means it is not ready.');
+        final response = await http.get(uri);
+        if (response.statusCode == 200) {
+          stdout.writeln('[INFO] $uri responded with 200, server is ready!');
+          return;
+        }
+        stdout.writeln('[INFO] $uri responded with ${response.statusCode}, server is not ready yet.');
+      } catch (_) {
+        // Keep polling until webdev starts listening and serving successfully.
+        stdout.writeln('[INFO] $uri responded with an error, server is not ready yet.');
+      }
+      await Future.delayed(pollInterval);
+    }
   }
 }
