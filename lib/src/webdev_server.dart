@@ -13,10 +13,8 @@
 // limitations under the License.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:http/http.dart' as http;
 import 'package:webdev_proxy/src/logging.dart';
 
 /// A simple abstraction over a `webdev serve ...` process.
@@ -56,23 +54,6 @@ class WebdevServer {
       webdevArgs,
       mode: mode,
     );
-
-    // `inheritStdio` and `detached` do not expose readable stdout streams.
-    // if (mode == ProcessStartMode.normal ||
-    //     mode == ProcessStartMode.detachedWithStdio) {
-    //   // `webdev serve` doesn't expose a dedicated "ready" signal, so key off
-    //   // the "Built with" log line.
-    //   var loggedReadyMessage = false;
-    //   unawaited(process.stdout
-    //       .transform(utf8.decoder)
-    //       .transform(const LineSplitter())
-    //       .listen((line) {
-    //     if (!loggedReadyMessage && line.contains('[INFO] : Built with')) {
-    //       loggedReadyMessage = true;
-    //       stdout.writeln('[INFO] Succeeded after');
-    //     }
-    //   }).asFuture<void>());
-    // }
 
     return WebdevServer._(process);
   }
