@@ -57,7 +57,6 @@ class WebdevServer {
       mode: mode,
     );
 
-
     // `inheritStdio` and `detached` do not expose readable stdout streams.
     // if (mode == ProcessStartMode.normal ||
     //     mode == ProcessStartMode.detachedWithStdio) {

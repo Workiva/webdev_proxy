@@ -1,3 +1,15 @@
+## 0.1.14
+
+- #66 Detect readiness of the server and output ready message
+
+## 0.1.13
+
+- # 50 Bump Workiva/gha-dart-oss from 0.1.5 to 0.1.7 in the gha group across 1 directory
+
+- #51 Raise the meta dependency min to v1.16.0
+
+- #52 raise_min_dart_sdk_2_19
+
 ## 0.1.12
 
 - Update ranges of dependencies so that in Dart 3 we can resolve to analyzer 6, while still working with Dart 2.19. https://github.com/Workiva/webdev_proxy/pull/46
