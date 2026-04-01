@@ -1,6 +1,14 @@
-## Unreleased
+## 0.1.14
 
 - #67 Detect build readiness from webdev stdout for compatibility with Dart 3 / newer webdev versions.
+
+## 0.1.13
+
+- #50 Bump Workiva/gha-dart-oss from 0.1.5 to 0.1.7 in the gha group across 1 directory
+
+- #51 Raise the meta dependency min to v1.16.0
+
+- #52 raise_min_dart_sdk_2_19
 
 ## 0.1.12
 
