@@ -1,3 +1,7 @@
+## Unreleased
+
+- #67 Detect build readiness from webdev stdout for compatibility with Dart 3 / newer webdev versions.
+
 ## 0.1.12
 
 - Update ranges of dependencies so that in Dart 3 we can resolve to analyzer 6, while still working with Dart 2.19. https://github.com/Workiva/webdev_proxy/pull/46

@@ -149,6 +149,8 @@ class ServeCommand extends Command<int> {
       for (final dir in portsToServeByDir.keys) dir: await findUnusedPort()
     };
 
+    final startupTimer = Stopwatch()..start();
+
     // Start the underlying `webdev serve` process.
     webdevServer = await WebdevServer.start([
       if (hostname != 'localhost') '--hostname=$hostname',
@@ -156,6 +158,10 @@ class ServeCommand extends Command<int> {
       for (final dir in portsToServeByDir.keys)
         '$dir:${portsToProxyByDir[dir]}',
     ]);
+
+    // Forward webdev stdout bytes directly so the terminal interprets ANSI
+    // escape sequences and \r-based line rewrites natively.
+    webdevServer.stdoutBytes.listen((bytes) => stdout.add(bytes));
 
     // Stop proxies and exit if webdev exits.
     unawaited(webdevServer.exitCode.then((code) {
@@ -185,6 +191,30 @@ class ServeCommand extends Command<int> {
         break;
       }
     }
+
+    if (!proxiesFailed) {
+      // Wait for build_runner to report completion via webdev's stdout.
+      // build_runner always emits one of these lines when the initial build
+      // finishes, regardless of whether -v/verbose is set.
+      const buildCompleteStrings = [
+        'Built with build_runner',
+        'Failed to build with build_runner',
+      ];
+      await Future.any([
+        webdevServer.stdoutLines.firstWhere(
+          (line) => buildCompleteStrings.any(line.contains),
+        ),
+        exitCodeCompleter.future,
+      ]);
+
+      if (!exitCodeCompleter.isCompleted) {
+        final elapsedSeconds =
+            (startupTimer.elapsedMilliseconds / 1000).toStringAsFixed(1);
+        stdout.writeln('[INFO] Succeeded after $elapsedSeconds seconds');
+      }
+    }
+
+    startupTimer.stop();
 
     return exitCodeCompleter.future;
   }
