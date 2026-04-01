@@ -11,9 +11,13 @@ on:
 jobs:
   build:
     uses: Workiva/gha-dart-oss/.github/workflows/build.yaml@v0.1.14
+    with:
+      sdk: stable
 
   checks:
     uses: Workiva/gha-dart-oss/.github/workflows/checks.yaml@v0.1.14
+    with:
+      sdk: stable
 
   test-unit:
     strategy:
