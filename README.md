@@ -35,6 +35,9 @@ Usage: webdev_proxy serve [-- [webdev serve arguments]]
     --[no-]rewrite-404s    Rewrite every request that returns a 404 to /index.html
                            (defaults to on)
 
+The proxy arguments can contain either the webdev <directory>[:<port>] syntax
+or proxy-specific <directory>:<proxyPort>:<port> syntax.
+
 Run "webdev_proxy help" to see global options.
 
 You may use any of the following options supported by `webdev serve` by passing them after the `--` separator.

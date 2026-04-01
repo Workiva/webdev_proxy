@@ -16,37 +16,57 @@ final _defaultWebDirs = const ['web'];
 final _dirPattern = RegExp(
     // Matches and captures any directory path, e.g. `web` or `test/nested/dir/`
     r'^([\w/]+)'
-    // Optional non-capturing group since webdev allows for the port to be omitted
+    // Optional non-capturing group since webdev allows for the ports to be omitted
     r'(?:'
     // Matches and captures any port, e.g. `:8080` or `:9001`
     r':(\d+)'
     // Ends the optional non-capturing group
-    r')?$');
+    r'){0,2}$');
+
+class ParsedDirectoryPorts {
+  final String directory;
+  final int? proxyPort;
+  final int servePort;
+  ParsedDirectoryPorts(
+      {required this.directory, this.proxyPort, required this.servePort});
+}
 
 /// Returns a mapping of directories to ports parsed from command-line [args] in
 /// the form of `<directory>:<port>`.
 ///
 /// If no mappings are specified in [args], the default mapping of web:8080 is
 /// returned.
-Map<String, int> parseDirectoryArgs(List<String> args) {
-  final result = <String, int>{};
+ParseDirectoryArgsResults parseDirectoryArgs(List<String> args) {
+  final ports = <ParsedDirectoryPorts>[];
+  final remainingArgs = <String>[];
   var basePort = 8080;
-  final dirArgs = args.where((_dirPattern.hasMatch));
-  if (dirArgs.isEmpty) {
-    for (final dir in _defaultWebDirs) {
-      result[dir] = basePort++;
-    }
-  } else {
-    for (final arg in dirArgs) {
+  for (final arg in args) {
+    if (!_dirPattern.hasMatch(arg)) {
+      remainingArgs.add(arg);
+    } else {
       final splitOption = arg.split(':');
-      if (splitOption.length == 2) {
-        result[splitOption.first] = int.parse(splitOption.last);
+      if (splitOption.length == 3) {
+        ports.add(ParsedDirectoryPorts(
+            directory: splitOption[0],
+            proxyPort: int.parse(splitOption[1]),
+            servePort: int.parse(splitOption[2])));
+      } else if (splitOption.length == 2) {
+        ports.add(ParsedDirectoryPorts(
+            directory: splitOption.first,
+            servePort: int.parse(splitOption.last)));
       } else {
-        result[arg] = basePort++;
+        ports
+            .add(ParsedDirectoryPorts(directory: arg, servePort: basePort++));
       }
     }
   }
-  return result;
+  return ParseDirectoryArgsResults(ports, remainingArgs);
+}
+
+class ParseDirectoryArgsResults {
+  final List<ParsedDirectoryPorts> ports;
+  final List<String> remainingArgs;
+  ParseDirectoryArgsResults(this.ports, this.remainingArgs);
 }
 
 /// Returns the value of the `--hostname` option from a list of command-line
