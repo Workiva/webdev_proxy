@@ -26,7 +26,7 @@ dev_dependencies:
   # These two build deps are required by webdev.
   build_runner: ^2.1.2
   build_web_compilers: '>3.0.0 <5.0.0'
-  lints: '>=2.0.1 <5.0.0'
+  lints: ^6.1.0
 
   shelf_static: ^1.1.0
   sse: ^4.1.0
