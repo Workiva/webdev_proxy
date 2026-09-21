@@ -13,6 +13,7 @@
 // limitations under the License.
 
 @TestOn('vm')
+@Timeout(Duration(minutes: 2))
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -25,9 +26,10 @@ import 'package:webdev_proxy/src/webdev_server.dart';
 
 import 'util.dart';
 
-// Matches the build-complete patterns that build_runner emits to webdev stdout.
+// Matches the build-complete patterns that build_runner emits to webdev stdout
+// (e.g. 'Built with build_runner' or 'Built with build_runner/aot').
 final _buildCompletePattern =
-    RegExp(r'Built with build_runner|Failed to build with build_runner');
+    RegExp(r'(Built|Failed to build) with build_runner');
 
 // Strips ANSI escape sequences so output is readable in test logs.
 String _stripAnsi(String s) =>
@@ -36,6 +38,14 @@ String _stripAnsi(String s) =>
 void main() {
   setUpAll(() async {
     await activateWebdev(webdevCompatibility.toString());
+  });
+
+  setUp(() {
+    Process.runSync('dart', ['run', 'build_runner', 'clean']);
+  });
+
+  tearDownAll(() async {
+    Process.runSync('dart', ['run', 'build_runner', 'clean']);
   });
 
   group('WebdevServer', () {
