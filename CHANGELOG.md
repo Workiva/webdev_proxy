@@ -1,3 +1,8 @@
+## Unreleased
+
+- Allow `webdev` versions up to `<5.0.0` (support `webdev` 4.x).
+- Match `Built with build_runner/aot` output in addition to `Built with build_runner`.
+
 ## 0.1.14
 
 - #67 Detect build readiness from webdev stdout for compatibility with Dart 3 / newer webdev versions.

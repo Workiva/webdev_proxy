@@ -115,11 +115,13 @@ class ServeCommand extends Command<int> {
     final proxies = <WebdevProxyServer>[];
     var proxiesFailed = false;
     StreamSubscription? sigintSub;
+    StreamSubscription? sigtermSub;
     WebdevServer? webdevServer;
 
     void shutDown(int code) async {
       await Future.wait([
         if (sigintSub != null) sigintSub.cancel(),
+        if (sigtermSub != null) sigtermSub.cancel(),
         if (webdevServer != null) webdevServer.close(),
         ...proxies.map((proxy) => proxy.close()),
       ]);
@@ -134,6 +136,13 @@ class ServeCommand extends Command<int> {
       log.info('Interrupt received, exiting.\n');
       shutDown(ExitCode.success.code);
     });
+    if (!Platform.isWindows) {
+      sigtermSub = ProcessSignal.sigterm.watch().listen((_) {
+        interruptReceived = true;
+        log.info('Termination signal received, exiting.\n');
+        shutDown(ExitCode.success.code);
+      });
+    }
 
     // Parse the hostname to serve each dir on (defaults to localhost).
     final hostnameResults = parseHostname(argResults!.rest);
@@ -194,15 +203,15 @@ class ServeCommand extends Command<int> {
 
     if (!proxiesFailed) {
       // Wait for build_runner to report completion via webdev's stdout.
-      // build_runner always emits one of these lines when the initial build
-      // finishes, regardless of whether -v/verbose is set.
-      const buildCompleteStrings = [
-        'Built with build_runner',
-        'Failed to build with build_runner',
-      ];
+      // build_runner emits one of these lines when the initial build
+      // finishes, regardless of whether -v/verbose is set (e.g.
+      // 'Built with build_runner' or 'Built with build_runner/aot').
+      final buildCompletePattern = RegExp(
+        r'(Built|Failed to build) with build_runner',
+      );
       await Future.any([
         webdevServer.stdoutLines.firstWhere(
-          (line) => buildCompleteStrings.any(line.contains),
+          (line) => buildCompletePattern.hasMatch(line),
         ),
         exitCodeCompleter.future,
       ]);
